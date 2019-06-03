@@ -55,6 +55,14 @@ namespace rtt {
     void kalmanObject::kalmanUpdateX() {
 
         this->invisibleCounter += 1;
+        if (this->invisibleCounter> DISAPPEARTIME&&this->exists){
+            if (this->id!=-1){
+                std::cout<<"Removing bot: "<<this->id<<std::endl;
+            }
+            else{
+                std::cout<<"Jumping Ball"<<std::endl;
+            }
+        }
         if (this->invisibleCounter > DISAPPEARTIME || !this->exists) {
             this->exists = false;
         } else {
@@ -77,6 +85,9 @@ namespace rtt {
 
     void kalmanObject::kalmanUpdateZ(roboteam_msgs::DetectionRobot robot, double timeStamp, uint cameraID) {
         //if the new data is a certain distance from the old data, it's considered a ghost and ignored
+        if (!this->exists){
+            std::cout<<"Adding bot: "<<robot.robot_id<<std::endl;
+        }
         if (this->exists){
             //HAck
             float errorx = robot.pos.x-this->X(0);
