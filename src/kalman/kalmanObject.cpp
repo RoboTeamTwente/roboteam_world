@@ -54,8 +54,8 @@ namespace rtt {
 
     void kalmanObject::kalmanUpdateX() {
 
-        this->invisibleCounter += 1;
-        if (this->invisibleCounter > DISAPPEARTIME || !this->visibleInWorld) {
+
+        if (this->invisibleCounter > DISAPPEARTIME ) {
             this->visibleInWorld = false;
         } else {
             // X_predict = FX_current
@@ -73,6 +73,7 @@ namespace rtt {
             }
 
         }
+        this->invisibleCounter += 1;
     }
 
     void kalmanObject::kalmanUpdateZ(roboteam_msgs::DetectionRobot robot, double timeStamp, uint cameraID) {
