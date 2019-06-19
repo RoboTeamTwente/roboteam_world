@@ -4,7 +4,7 @@
 namespace rtt {
 
     Ball::Ball() {
-        existence = INVALID_AREA;
+        area = INVALID_AREA;
         x = NAN;
         y = NAN;
         z = NAN;
@@ -22,8 +22,8 @@ namespace rtt {
     }
 
 
-    void Ball::set_existence(uint existence) {
-        this->existence = existence;
+    void Ball::set_area(uint _area) {
+        this->area = _area;
     }
 
     void Ball::set_visible(bool visible) {
@@ -38,14 +38,14 @@ namespace rtt {
         return Position(x_vel, y_vel, z_vel);
     }
     
-    uint Ball::get_existence() const {
-        return existence;
+    uint Ball::get_area() const {
+        return area;
     }
 
     roboteam_msgs::WorldBall Ball::as_message() const {
         roboteam_msgs::WorldBall msg;
 
-        msg.existence = existence;
+        msg.area = area;
 
         msg.pos.x = x;
         msg.pos.y = y;

@@ -50,12 +50,12 @@ roboteam_msgs::World kalmanFilter::getWorld() {
     roboteam_msgs::World world;
     world.time = lastFrameTime;
     for (const auto& kalmanOurBot : ourBots){
-        if (kalmanOurBot.getExistence()){
+        if (kalmanOurBot.getVisibleInWorld()){
             world.us.push_back(kalmanOurBot.as_message());
         }
     }
     for (const auto& kalmanTheirBot : theirBots){
-        if (kalmanTheirBot.getExistence()){
+        if (kalmanTheirBot.getVisibleInWorld()){
             world.them.push_back(kalmanTheirBot.as_message());
         }
     }

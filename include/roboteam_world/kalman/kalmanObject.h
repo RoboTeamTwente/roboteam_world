@@ -21,7 +21,7 @@ class kalmanObject {
         uint id; //Id of the object if applicable
         double observationTimeStamp; //Time of last observed data used to make sure old data doesn't replace new data
         int invisibleCounter; //count the ticks between observations, after a certain time the object doesn't exist anymore
-        bool exists; //if true we consider the object to be existing
+        bool visibleInWorld; //if true we consider the object to be existing
         int comparisonCount; //time the iteration of P and K where they are the same
         float orientation; //currently the filter only filters X and Y, du to the coordinate system
         double omega; //""
@@ -60,7 +60,7 @@ class kalmanObject {
         float getK();
 
         //Does the object exist
-        bool getExistence() const;
+        bool getVisibleInWorld() const;
 
         //Create a message, by default it's a robot message (the ball object overrides this)
         virtual roboteam_msgs::WorldRobot as_message() const;

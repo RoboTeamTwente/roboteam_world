@@ -55,8 +55,8 @@ namespace rtt {
     void kalmanObject::kalmanUpdateX() {
 
         this->invisibleCounter += 1;
-        if (this->invisibleCounter > DISAPPEARTIME || !this->exists) {
-            this->exists = false;
+        if (this->invisibleCounter > DISAPPEARTIME || !this->visibleInWorld) {
+            this->visibleInWorld = false;
         } else {
             // X_predict = FX_current
             // Y = Z - HX_predict
@@ -77,7 +77,7 @@ namespace rtt {
 
     void kalmanObject::kalmanUpdateZ(roboteam_msgs::DetectionRobot robot, double timeStamp, uint cameraID) {
         //if the new data is a certain distance from the old data, it's considered a ghost and ignored
-        if (this->exists){
+        if (this->visibleInWorld){
             //HAck
             float errorx = robot.pos.x-this->X(0);
             float errory = robot.pos.y-this->X(2);
@@ -86,7 +86,7 @@ namespace rtt {
             }
         }
         //if the object comes into being, make the observation it's state, (to prevent jumping)
-        if (!this->exists){
+        if (!this->visibleInWorld){
             this->pastObservation.clear();
             this->X(0) = robot.pos.x;
             this->X(2) = robot.pos.y;
@@ -100,7 +100,7 @@ namespace rtt {
         this->orientation = average.rot;
         this->observationTimeStamp = timeStamp;
         this->invisibleCounter = 0;
-        this->exists = true;
+        this->visibleInWorld = true;
     }
 
     Position kalmanObject::kalmanGetPos() const{
@@ -115,8 +115,8 @@ namespace rtt {
         return this->K(0, 0);
     }
 
-    bool kalmanObject::getExistence() const{
-        return this->exists;
+    bool kalmanObject::getVisibleInWorld() const{
+        return this->visibleInWorld;
     }
 
     roboteam_msgs::WorldRobot kalmanObject::as_message() const{

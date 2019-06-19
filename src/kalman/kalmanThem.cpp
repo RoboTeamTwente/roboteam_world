@@ -15,7 +15,7 @@ namespace rtt{
         this->id = id;
         this->observationTimeStamp = -1.0;
         this->invisibleCounter = 0;
-        this->exists = false;
+        this->visibleInWorld = false;
         this->comparisonCount = 0;
         this->orientation = 0;
         this->omega = 0;

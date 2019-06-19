@@ -11,7 +11,7 @@ kalmanBall::kalmanBall() {
     this->observationTimeStamp = - 1.0;
     this->invisibleCounter = 1000; //make sure the ball is invisible
     this->visibility = NOT_VISIBLE;
-    this->exists = false;
+    this->visibleInWorld = false;
     this->comparisonCount = 0;
     this->orientation = 0;
     this->omega = 0;
@@ -86,7 +86,7 @@ roboteam_msgs::WorldBall kalmanBall::as_ball_message() {
     Vector2 curVel = {vel.x, vel.y};
     filterVel(curVel);
     // since the balls z axis is being kept in the third place of the vector it is the 'rotation' here
-    msg.existence = 1;
+    msg.area = 1;
     msg.visible = isVisible();
     msg.pos.x = pos.x;
     msg.pos.y = pos.y;
