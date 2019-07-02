@@ -100,9 +100,9 @@ namespace rtt {
         // first we update the visibility and check if the ball has been seen the last time
         if (this->invisibleCounter>DISAPPEARTIME && this->visibility==EXTRAPOLATED){
             if (this->id == INVALID_ID) {
-                std::cout << "Invisible ball!" << std::endl;
+                std::cout << "Ball disappeared" << std::endl;
             } else {
-                std::cout<<"Invisible robot id: "<< this->id <<std::endl;
+                std::cout<<"Robot id: "<< this->id <<" disappeared" <<std::endl;
             }
         }
         updateVisibility();

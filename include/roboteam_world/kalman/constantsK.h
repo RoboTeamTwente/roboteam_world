@@ -15,8 +15,8 @@ const float TIMEDIFF = 0.01;
 enum visState { NOT_VISIBLE, EXTRAPOLATED, VISIBLE };
 
 // time after which objects disappear
-const float DISAPPEARTIME=0.5/TIMEDIFF;//amount of frames we wait for the object to disappear
-const float EXTRAPOLATEDTIME=0.05/TIMEDIFF;// amount of frames after we mark the object not visible but keep extrapolating it.
+const float DISAPPEARTIME=0.5/TIMEDIFF;//amount of ticks we wait for the object to disappear
+const float EXTRAPOLATEDTIME=0.05/TIMEDIFF;// amount of ticks after we mark the object not visible but keep extrapolating it.
 
 // amount of robots and balls per team that we keep track off
 const int BOTCOUNT=16; //id 0-15
