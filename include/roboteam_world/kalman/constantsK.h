@@ -7,8 +7,8 @@
 
 namespace rtt {
 // constant dimensions of the calculations
-const int STATEINDEX = 4;
-const int OBSERVATIONINDEX = 2;
+const int STATEINDEX = 6;
+const int OBSERVATIONINDEX = 3;
 // timerate
 const float TIMEDIFF = 0.01;
 // time after which robots disappear
@@ -44,6 +44,6 @@ const float randVar_ball = 100;
 
 const unsigned int INVALID_ID = - 1;
 
-};
+}
 
 #endif //ROBOTEAM_WORLD_CONSTANTSK_H

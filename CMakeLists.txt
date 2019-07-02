@@ -67,10 +67,8 @@ add_library(roboteam_world_srcs
         src/kalman/kalmanFilter.cpp
         src/kalman/kalmanObject.cpp
         src/kalman/kalmanBall.cpp
-        src/kalman/kalmanUs.cpp
-        src/kalman/kalmanThem.cpp
 
-    # src/world
+        # src/world
         src/filtered_world/filtered_world.cpp
         src/dummy_world/world_dummy.cpp
 

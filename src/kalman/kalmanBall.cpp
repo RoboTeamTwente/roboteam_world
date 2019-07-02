@@ -5,39 +5,7 @@
 #include "roboteam_world/kalman/kalmanBall.h"
 
 namespace rtt {
-kalmanBall::kalmanBall() {
-    //initialise everything
-    this->id = INVALID_ID; //ball has no id
-    this->observationTimeStamp = - 1.0;
-    this->invisibleCounter = 1000; //make sure the ball is invisible
-    this->visibility = NOT_VISIBLE;
-    this->exists = false;
-    this->comparisonCount = 0;
-    this->orientation = 0;
-    this->omega = 0;
-    this->cameraId = INVALID_ID;
-    this->X.zeros();
-    this->Z.zeros();
-    this->F = {{1, TIMEDIFF, 0, 0},
-               {0, 1, 0, 0},
-               {0, 0, 1, TIMEDIFF},
-               {0, 0, 0, 1}};
-    this->H = {{1, 0, 0, 0},
-               {0, 0, 1, 0}};
-    this->R = {{posVar_ball, 0},
-               {0, posVar_ball}};
-    this->I.eye();
-    this->P = {{stateVar_ball, 0, 0, 0},
-               {0, stateVar_ball, 0, 0},
-               {0, 0, stateVar_ball, 0},
-               {0, 0, 0, stateVar_ball}};
-    arma::fmat::fixed<STATEINDEX, 2> tempQ = {{TIMEDIFF, 0},
-                                              {1, 0},
-                                              {0, TIMEDIFF},
-                                              {0, 1}};
-    arma::fmat::fixed<2, STATEINDEX> tempQ_t = tempQ.t();
-    this->Q = tempQ*tempQ_t*randVar_ball;
-    this->K.zeros();
+kalmanBall::kalmanBall() :kalmanObject(INVALID_ID, posVar_ball, stateVar_ball, randVar_ball){
 }
 
 void kalmanBall::kalmanUpdateZ(roboteam_msgs::DetectionBall ball, double timeStamp, uint cameraID) {
@@ -117,12 +85,12 @@ void kalmanBall::kalmanUpdateX() {
         arma::fvec::fixed<STATEINDEX> X_predict = this->F*this->X;
         arma::fmat::fixed<OBSERVATIONINDEX, 1> Y;
         if (invisibleCounter<1){ // we only use the observation if we actually received one.
-            Y= this->Z - (this->H*X_predict);
+            Y = this->Z - (this->H*X_predict);
         }
         else{
             Y.zeros();
         }
-        arma::fvec::fixed<STATEINDEX> X_new = X_predict + (this->K*Y);
+        arma::fvec::fixed<STATEINDEX> X_new = X_predict + (this->K * Y);
 
         for (arma::uword i = 0; i < STATEINDEX; ++ i) {
             this->X(i) = X_new(i);

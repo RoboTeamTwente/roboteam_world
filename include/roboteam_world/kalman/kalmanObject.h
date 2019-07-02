@@ -41,6 +41,10 @@ class kalmanObject {
 
     public:
 
+        kalmanObject();
+
+        kalmanObject(uint id, float obsVar, float stateVar, float randVar);
+
         //updates the K till it doesn't change anymore (with wrong variance it can osscilate or grow exponetially)
         void kalmanUpdateK();
 
@@ -68,6 +72,8 @@ class kalmanObject {
         double limitRotation(double rotation) const;
 
         Position calculatePos(Vector2 pos, float rot, uint camID);
+
+        float calculateRot(float obsRot);
 
 };
 

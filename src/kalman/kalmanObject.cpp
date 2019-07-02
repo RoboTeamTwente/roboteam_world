@@ -6,6 +6,52 @@
 #include <roboteam_msgs/DetectionRobot.h>
 namespace rtt {
 
+    kalmanObject::kalmanObject() :kalmanObject(INVALID_ID, 1, 1, 1){
+
+    }
+
+    kalmanObject::kalmanObject(uint id, float obsVar, float stateVar, float randVar) {
+        //in the future data about them and us might be different so we made different classes
+        this->id = id;
+        this->observationTimeStamp = -1.0;
+        this->invisibleCounter = 0;
+        this->exists = false;
+        this->comparisonCount = 0;
+        this->orientation = 0;
+        this->omega = 0;
+        this->cameraId = INVALID_ID;
+        this->X.zeros();
+        this->Z.zeros();
+        this->F = {{1, TIMEDIFF, 0, 0,        0, 0       },
+                   {0, 1,        0, 0,        0, 0       },
+                   {0, 0,        1, TIMEDIFF, 0, 0       },
+                   {0, 0,        0, 1,        0, 0       },
+                   {0, 0,        0, 0,        1, TIMEDIFF},
+                   {0, 0,        0, 0,        0, 1       }};
+        this->H = {{1, 0, 0, 0, 0, 0},
+                   {0, 0, 1, 0, 0, 0},
+                   {0, 0, 0, 0, 1, 0}};
+        this->R = {{obsVar, 0, 0},
+                   {0, obsVar, 0},
+                   {0, 0, obsVar}};
+        this->I.eye();
+        this->P = {{stateVar, 0, 0, 0, 0, 0},
+                   {0, stateVar, 0, 0, 0, 0},
+                   {0, 0, stateVar, 0, 0, 0},
+                   {0, 0, 0, stateVar, 0, 0},
+                   {0, 0, 0, 0, stateVar, 0},
+                   {0, 0, 0, 0, 0, stateVar}};
+        arma::fmat::fixed<STATEINDEX, OBSERVATIONINDEX> tempQ = {{TIMEDIFF, 0, 0},
+                                                                 {1       , 0, 0},
+                                                                 {0, TIMEDIFF, 0},
+                                                                 {0, 1       , 0},
+                                                                 {0, 0, TIMEDIFF},
+                                                                 {0, 0, 1       }};
+        arma::fmat::fixed<OBSERVATIONINDEX, STATEINDEX> tempQ_t = tempQ.t();
+        this->Q = tempQ * tempQ_t * randVar;
+        this->K.zeros();
+    }
+
     void kalmanObject::kalmanUpdateK() {
 
         if (this->comparisonCount < MAXCOMPARISONS) {
@@ -56,7 +102,7 @@ namespace rtt {
 
         this->invisibleCounter += 1;
         if (this->invisibleCounter> DISAPPEARTIME&&this->exists){
-            if (this->id!=-1) {
+            if (this->id != -1) {
                 std::cout << "Removing bot: " << this->id<< std::endl;
             }
         }
@@ -95,12 +141,14 @@ namespace rtt {
             this->pastObservation.clear();
             this->X(0) = robot.pos.x;
             this->X(2) = robot.pos.y;
+            this->X(4) = robot.orientation;
         }
         Position average = calculatePos(robot.pos, robot.orientation, cameraID);
         this->cameraId = cameraID;
         this->id= robot.robot_id;
         this->Z(0) = average.x;
         this->Z(1) = average.y;
+        this->Z(2) = calculateRot(average.rot);
         this->omega = (average.rot - this->orientation)/(timeStamp-this->observationTimeStamp);
         this->orientation = average.rot;
         this->observationTimeStamp = timeStamp;
@@ -109,11 +157,11 @@ namespace rtt {
     }
 
     Position kalmanObject::kalmanGetPos() const{
-        return {this->X(0), this->X(2), this->orientation};
+        return {this->X(0), this->X(2), this->X(4)};
     }
 
     Position kalmanObject::kalmanGetVel() const{
-        return {this->X(1), this->X(3), this->omega};
+        return {this->X(1), this->X(3), this->X(5)};
     }
 
     float kalmanObject::getK(){
@@ -164,6 +212,19 @@ namespace rtt {
             average.rot /= amount;
             return average;
         }
+    }
+
+    float kalmanObject::calculateRot(float obsRot){
+        float rotDiff = this->X(4)-obsRot;
+        while (abs(rotDiff)>M_PI){
+            if (rotDiff>M_PI){
+                obsRot += 2*M_PI;
+            } else {
+                obsRot -= 2*M_PI;
+            }
+            rotDiff = this->X(4)-obsRot;
+        }
+        return obsRot;
     }
 
 

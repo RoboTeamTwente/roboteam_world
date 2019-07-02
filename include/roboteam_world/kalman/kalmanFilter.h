@@ -7,8 +7,6 @@
 
 
 #include "kalmanObject.h"
-#include "kalmanUs.h"
-#include "kalmanThem.h"
 #include "kalmanBall.h"
 #include "roboteam_utils/Position.h"
 #include "roboteam_msgs/DetectionFrame.h"
@@ -32,10 +30,9 @@ namespace rtt {
 
         roboteam_msgs::World getWorld();
 
-        kalmanThem theirBots[BOTCOUNT];
-        kalmanUs ourBots[BOTCOUNT];
+        kalmanObject theirBots[BOTCOUNT];
+        kalmanObject ourBots[BOTCOUNT];
         kalmanBall ball;
-
     };
 }
 
