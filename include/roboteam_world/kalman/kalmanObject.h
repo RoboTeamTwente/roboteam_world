@@ -43,7 +43,7 @@ class kalmanObject {
 
         kalmanObject();
 
-        kalmanObject(uint id, float obsVar, float stateVar, float randVar);
+        kalmanObject(uint id, float obsVar, float stateVar, float randVar, float angleVar);
 
         //updates the K till it doesn't change anymore (with wrong variance it can osscilate or grow exponetially)
         void kalmanUpdateK();

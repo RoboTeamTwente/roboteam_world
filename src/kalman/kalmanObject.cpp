@@ -10,7 +10,7 @@ namespace rtt {
 
     }
 
-    kalmanObject::kalmanObject(uint id, float obsVar, float stateVar, float randVar) {
+    kalmanObject::kalmanObject(uint id, float obsVar, float stateVar, float randVar, float angleVar) {
         //in the future data about them and us might be different so we made different classes
         this->id = id;
         this->observationTimeStamp = -1.0;
@@ -31,7 +31,7 @@ namespace rtt {
                    {0, 0, 0, 0, 1, 0}};
         this->R = {{obsVar, 0, 0},
                    {0, obsVar, 0},
-                   {0, 0, obsVar}};
+                   {0, 0, angleVar}};
         this->I.eye();
         this->P = {{stateVar, 0, 0, 0, 0, 0},
                    {0, stateVar, 0, 0, 0, 0},

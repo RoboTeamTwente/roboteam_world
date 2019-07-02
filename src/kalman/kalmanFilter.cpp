@@ -10,10 +10,10 @@ kalmanFilter::kalmanFilter() {
     //initialise kalman objects
     lastFrameTime = - 1.0;
     for (uint i = 0; i < BOTCOUNT; ++ i) {
-        ourBots[i] = kalmanObject(i, posVar_us, stateVar_us, randVar_us);
-        theirBots[i] = kalmanObject(i, posVar_them, stateVar_them, randVar_them);
+        ourBots[i] = kalmanObject(i, posVar_us, stateVar_us, randVar_us, angleVar_us);
+        theirBots[i] = kalmanObject(i, posVar_them, stateVar_them, randVar_them, angleVar_them);
     }
-    ball = kalmanObject(INVALID_ID, posVar_ball, stateVar_ball, randVar_ball);
+    ball = kalmanObject(INVALID_ID, posVar_ball, stateVar_ball, randVar_ball, 1);
 }
 
 void kalmanFilter::kalmanUpdate() {

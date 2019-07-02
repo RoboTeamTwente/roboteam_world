@@ -41,6 +41,8 @@ const float randVar_them = 1;
 const float posVar_ball = 1;
 const float stateVar_ball = posVar_ball;
 const float randVar_ball = 100;
+const float angleVar_us = 1;
+const float angleVar_them = 1;
 
 
 const unsigned int INVALID_ID = - 1;
