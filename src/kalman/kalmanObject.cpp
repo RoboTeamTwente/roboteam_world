@@ -251,13 +251,11 @@ namespace rtt {
 
     float kalmanObject::calculateRot(float obsRot){
         float rotDiff = this->X(4)-obsRot;
-        while (abs(rotDiff)>M_PI){
-            if (rotDiff>M_PI){
-                obsRot += 2*M_PI;
-            } else if (rotDiff<-1*M_PI) {
-                obsRot -= 2*M_PI;
-            }
-            rotDiff = this->X(4)-obsRot;
+        int twists = abs(rotDiff+M_PI)/(2*M_PI);
+        if (rotDiff>M_PI){
+            obsRot += twists*2*M_PI;
+        } else if (rotDiff<-1*M_PI) {
+            obsRot -= twists*2*M_PI;
         }
         return obsRot;
     }
