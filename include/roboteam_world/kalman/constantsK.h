@@ -33,9 +33,9 @@ const int MAXCOMPARISONS = 100;
 // More trust in the model/state (higher Posvar compared to RandVar) leads to a smoother but slower signal
 // More trust in the observation (higher Randvar compared to PosVar) leads to a noiser but faster signal
 // Values should be bigger than 1
-const float posVar = 5;
-const float randVar = 10;
-const float angleVar = 1;
+const float posVar = 2;
+const float randVar = 1;
+const float angleVar = 0.1;
 const float posVar_ball = 1;
 const float randVar_ball = 100;
 
