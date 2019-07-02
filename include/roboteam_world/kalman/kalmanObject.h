@@ -24,9 +24,7 @@ class kalmanObject {
         double observationTimeStamp; //Time of last observed data used to make sure old data doesn't replace new data
         int invisibleCounter; //count the ticks between observations, after a certain time the object doesn't exist anymore
         visState visibility;
-        int comparisonCount; //time the iteration of P and K where they are the same
-        float orientation; //currently the filter only filters X and Y, du to the coordinate system
-        double omega; //""
+        int comparisonCount;
         uint cameraId;
         std::map<int, Position> pastObservation;
 

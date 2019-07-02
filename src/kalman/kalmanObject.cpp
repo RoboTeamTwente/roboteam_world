@@ -17,8 +17,6 @@ namespace rtt {
         this->invisibleCounter = 0;
         this->visibility = NOT_VISIBLE;
         this->comparisonCount = 0;
-        this->orientation = 0;
-        this->omega = 0;
         this->cameraId = INVALID_ID;
         this->X.zeros();
         this->Z.zeros();
@@ -100,8 +98,12 @@ namespace rtt {
 
     void kalmanObject::kalmanUpdateX() {
         // first we update the visibility and check if the ball has been seen the last time
-        if (this->invisibleCounter>EXTRAPOLATEDTIME && this->visibility==EXTRAPOLATED){
-            std::cout<<"Invisible ball! Not moving it anymore. "<<std::endl;
+        if (this->invisibleCounter>DISAPPEARTIME && this->visibility==EXTRAPOLATED){
+            if (this->id == INVALID_ID) {
+                std::cout << "Invisible ball!" << std::endl;
+            } else {
+                std::cout<<"Invisible robot id: "<< this->id <<std::endl;
+            }
         }
         updateVisibility();
 
@@ -152,8 +154,12 @@ namespace rtt {
             }
         }
         else {
-            // we found a new ball so we are resetting the state. We assume it's velocity is 0.
-            std::cout<<"Jumping the ball"<<std::endl;
+            // we found a new object so we are resetting the state. We assume it's velocity is 0.
+            if (this->id == INVALID_ID) {
+                std::cout << "Adding the ball" << std::endl;
+            } else {
+                std::cout << "Adding robot id:" << this->id << std::endl;
+            }
             this->pastObservation.clear();
             this->X.zeros();
             this->X(0) = observation.x;
@@ -165,10 +171,6 @@ namespace rtt {
         this->Z(0) = average.x;
         this->Z(1) = average.y;
         this->Z(2) = calculateRot(average.rot);
-
-        // this is actually the height of the ball, but we are stupid
-        this->omega = (average.rot - this->orientation)/(timeStamp - this->observationTimeStamp);
-        this->orientation = average.rot;
 
         this->observationTimeStamp = timeStamp;
         this->invisibleCounter = 0;
@@ -220,11 +222,11 @@ namespace rtt {
     }
 
     double kalmanObject::limitRotation(double rotation) const{
-        double constRot=fmod(rotation+M_PI, 2*M_PI)-M_PI;
-        if (constRot<-M_PI||constRot>=M_PI){
-            return -M_PI+std::numeric_limits<float>::epsilon();
+         rotation = fmod(rotation+M_PI, 2*M_PI)-M_PI;
+        if (rotation < 0){
+            rotation += 2*M_PI;
         }
-        return constRot;
+        return rotation;
     }
 
     Position kalmanObject::calculatePos(Position pos, uint camID){
