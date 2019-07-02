@@ -6,7 +6,7 @@
 #include <roboteam_msgs/DetectionRobot.h>
 namespace rtt {
 
-    kalmanObject::kalmanObject() :kalmanObject(INVALID_ID, 1, 1, 1, 0){
+    kalmanObject::kalmanObject() :kalmanObject(INVALID_ID, 1, 1, 1, BALL){
 
     }
 
@@ -224,10 +224,12 @@ namespace rtt {
     }
 
     double kalmanObject::limitRotation(double rotation) const{
-         rotation = fmod(rotation+M_PI, 2*M_PI)-M_PI;
-        if (rotation < 0){
+        rotation = fmod((rotation+M_PI), 2*M_PI);
+        if (rotation <= 0){
             rotation += 2*M_PI;
         }
+        rotation -= M_PI;
+
         //the scale in roboteam_ai does not include M_PI
         //this reduced it just below the limit
         //the epsilon thing is the smallest float value
@@ -262,7 +264,7 @@ namespace rtt {
         int twists = int(abs(rotDiff+M_PI)/(2*M_PI));
         if (rotDiff>M_PI){
             obsRot += twists*2*M_PI;
-        } else if (rotDiff<-1*M_PI) {
+        } else if (rotDiff<-M_PI) {
             obsRot -= twists*2*M_PI;
         }
         return obsRot;
