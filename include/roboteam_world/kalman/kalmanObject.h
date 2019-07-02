@@ -23,7 +23,7 @@ class kalmanObject {
         uint id; //Id of the object if applicable
         double observationTimeStamp; //Time of last observed data used to make sure old data doesn't replace new data
         int invisibleCounter; //count the ticks between observations, after a certain time the object doesn't exist anymore
-        bool exists; //if true we consider the object to be existing
+        visState visibility;
         int comparisonCount; //time the iteration of P and K where they are the same
         float orientation; //currently the filter only filters X and Y, du to the coordinate system
         double omega; //""
@@ -55,6 +55,8 @@ class kalmanObject {
 
         void kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot,double timeStamp, uint cameraID);
 
+        void kalmanUpdateBall(roboteam_msgs::DetectionBall ball, double timeStamp, uint cameraID);
+
         //if the data is more recent than the current data, import the new observation data
         void kalmanUpdateZ(Position observation,double timeStamp, uint cameraID);
 
@@ -64,14 +66,14 @@ class kalmanObject {
         //Get X_vel, Y_vel and omega
         Position kalmanGetVel() const;
 
-        //Get K for debug
-        float getK();
-
         //Does the object exist
         bool getExistence() const;
 
         //Create a message, by default it's a robot message (the ball object overrides this)
         virtual roboteam_msgs::WorldRobot as_message() const;
+
+        //Same as the KalmanObject function but then for ball message
+        roboteam_msgs::WorldBall as_ball_message();
 
         double limitRotation(double rotation) const;
 
@@ -80,6 +82,10 @@ class kalmanObject {
 
         //Ensures that the observed orientation is neveroat rotDiff = this->X(4)-obsRot; further away than pi from the state orientation
         float calculateRot(float obsRot);
+
+        bool isVisible();
+
+        void updateVisibility();
 
 };
 

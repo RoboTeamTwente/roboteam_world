@@ -11,15 +11,16 @@ const int STATEINDEX = 6;
 const int OBSERVATIONINDEX = 3;
 // timerate
 const float TIMEDIFF = 0.01;
-// time after which robots disappear
-const float DISAPPEARTIME = 0.5/TIMEDIFF; //seconds/TIMEDIFF
+//the different states the objects can be in
+enum visState { NOT_VISIBLE, EXTRAPOLATED, VISIBLE };
 
-const float BALLDISAPPEARTIME=0.5/TIMEDIFF;//amount of frames we wait for the ball to disappear
-const float BALLEXTRAPOLATEDTIME=0.05/TIMEDIFF;// amount of frames after we mark the ball not visible but keep extrapolating it.
+// time after which objects disappear
+const float DISAPPEARTIME=0.5/TIMEDIFF;//amount of frames we wait for the object to disappear
+const float EXTRAPOLATEDTIME=0.05/TIMEDIFF;// amount of frames after we mark the object not visible but keep extrapolating it.
+
 // amount of robots and balls per team that we keep track off
 const int BOTCOUNT=16; //id 0-15
 const int BALLCOUNT=1;
-const int TOTALCOUNT=BOTCOUNT*2+BALLCOUNT;
 //used for checking convergence of K matrix
 const float KMARGIN = 0.000001;
 const int MAXCOMPARISONS = 100;

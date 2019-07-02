@@ -13,7 +13,7 @@ kalmanFilter::kalmanFilter() {
         ourBots[i] = kalmanObject(i, posVar_us, stateVar_us, randVar_us);
         theirBots[i] = kalmanObject(i, posVar_them, stateVar_them, randVar_them);
     }
-    ball = kalmanBall();
+    ball = kalmanObject(INVALID_ID, posVar_ball, stateVar_ball, randVar_ball);
 }
 
 void kalmanFilter::kalmanUpdate() {
