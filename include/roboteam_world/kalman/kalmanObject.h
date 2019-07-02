@@ -10,6 +10,8 @@
 #include "constantsK.h"
 #include "roboteam_msgs/DetectionRobot.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_msgs/DetectionBall.h"
+#include "roboteam_msgs/WorldBall.h"
 
 namespace rtt {
 
@@ -51,8 +53,10 @@ class kalmanObject {
         //If the object exists, updates the state
         virtual void kalmanUpdateX();
 
+        void kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot,double timeStamp, uint cameraID);
+
         //if the data is more recent than the current data, import the new observation data
-        void kalmanUpdateZ(roboteam_msgs::DetectionRobot robot,double timeStamp, uint cameraID);
+        void kalmanUpdateZ(Position observation,double timeStamp, uint cameraID);
 
         //Get X,Y and Orientation
         Position kalmanGetPos() const;
@@ -71,8 +75,10 @@ class kalmanObject {
 
         double limitRotation(double rotation) const;
 
-        Position calculatePos(Vector2 pos, float rot, uint camID);
+        //Averages the data of multiple cameras
+        Position calculatePos(Position pos, uint camID);
 
+        //Ensures that the observed orientation is neveroat rotDiff = this->X(4)-obsRot; further away than pi from the state orientation
         float calculateRot(float obsRot);
 
 };

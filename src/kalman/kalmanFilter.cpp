@@ -35,13 +35,13 @@ void kalmanFilter::newFrame(const roboteam_msgs::DetectionFrame &msg) {
     lastFrameTime = timeCapture;
     uint cameraID = msg.camera_id;
     for (const roboteam_msgs::DetectionRobot robot : msg.us) {
-        ourBots[robot.robot_id].kalmanUpdateZ(robot, timeCapture, cameraID);
+        ourBots[robot.robot_id].kalmanUpdateRobot(robot, timeCapture, cameraID);
     }
     for (const roboteam_msgs::DetectionRobot robot : msg.them) {
-        theirBots[robot.robot_id].kalmanUpdateZ(robot, timeCapture, cameraID);
+        theirBots[robot.robot_id].kalmanUpdateRobot(robot, timeCapture, cameraID);
     }
     for (const roboteam_msgs::DetectionBall detBall : msg.balls) {
-        ball.kalmanUpdateZ(detBall, timeCapture, cameraID);
+        ball.kalmanUpdateBall(detBall, timeCapture, cameraID);
     }
 }
 

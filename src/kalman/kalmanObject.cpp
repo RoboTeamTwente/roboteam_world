@@ -102,9 +102,7 @@ namespace rtt {
 
         this->invisibleCounter += 1;
         if (this->invisibleCounter> DISAPPEARTIME&&this->exists){
-            if (this->id != -1) {
-                std::cout << "Removing bot: " << this->id<< std::endl;
-            }
+            std::cout << "Removing bot: " << this->id<< std::endl;
         }
         if (this->invisibleCounter > DISAPPEARTIME || !this->exists) {
             this->exists = false;
@@ -126,26 +124,33 @@ namespace rtt {
         }
     }
 
-    void kalmanObject::kalmanUpdateZ(roboteam_msgs::DetectionRobot robot, double timeStamp, uint cameraID) {
+    void kalmanObject::kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot,double timeStamp, uint cameraID){
+        Position observation;
+        observation.x = robot.pos.x;
+        observation.y = robot.pos.y;
+        observation.rot = robot.orientation;
+        kalmanUpdateZ(observation, timeStamp, cameraID);
+    }
+
+    void kalmanObject::kalmanUpdateZ(Position observation, double timeStamp, uint cameraID) {
         //if the new data is a certain distance from the old/predicted data, it's considered a ghost and ignored
         if (this->exists){
-            float errorx = robot.pos.x-this->X(0);
-            float errory = robot.pos.y-this->X(2);
+            float errorx = observation.x-this->X(0);
+            float errory = observation.y-this->X(2);
             if (errorx*errorx+errory*errory >= 0.2*0.2){
                 return;
             }
         }
         //if the object comes into being, make the observation it's state, (to prevent jumping)
         if (!this->exists){
-            std::cout<<"Adding bot: "<<robot.robot_id<<std::endl;
+            std::cout<<"Adding bot: "<<this->id<<std::endl;
             this->pastObservation.clear();
-            this->X(0) = robot.pos.x;
-            this->X(2) = robot.pos.y;
-            this->X(4) = robot.orientation;
+            this->X(0) = observation.x;
+            this->X(2) = observation.y;
+            this->X(4) = observation.rot;
         }
-        Position average = calculatePos(robot.pos, robot.orientation, cameraID);
+        Position average = calculatePos(observation, cameraID);
         this->cameraId = cameraID;
-        this->id= robot.robot_id;
         this->Z(0) = average.x;
         this->Z(1) = average.y;
         this->Z(2) = calculateRot(average.rot);
@@ -194,12 +199,12 @@ namespace rtt {
         return constRot;
     }
 
-    Position kalmanObject::calculatePos(Vector2 pos, float rot, uint camID){
+    Position kalmanObject::calculatePos(Position pos, uint camID){
         if (camID == this->cameraId){
             this->pastObservation.clear();
-            return {pos.x, pos.y, rot};
+            return pos;
         } else {
-            this->pastObservation[camID] = {pos.x, pos.y, rot};
+            this->pastObservation[camID] = pos;
             Position average = {0, 0, 0};
             for (auto obs : pastObservation) {
                 average.x += obs.second.x;
@@ -219,7 +224,7 @@ namespace rtt {
         while (abs(rotDiff)>M_PI){
             if (rotDiff>M_PI){
                 obsRot += 2*M_PI;
-            } else {
+            } else if (rotDiff<-1*M_PI) {
                 obsRot -= 2*M_PI;
             }
             rotDiff = this->X(4)-obsRot;

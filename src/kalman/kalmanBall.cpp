@@ -8,14 +8,22 @@ namespace rtt {
 kalmanBall::kalmanBall() :kalmanObject(INVALID_ID, posVar_ball, stateVar_ball, randVar_ball){
 }
 
-void kalmanBall::kalmanUpdateZ(roboteam_msgs::DetectionBall ball, double timeStamp, uint cameraID) {
+void kalmanBall::kalmanUpdateBall(roboteam_msgs::DetectionBall ball, double timeStamp, uint cameraID){
+    Position observation;
+    observation.x = ball.pos.x;
+    observation.y = ball.pos.y;
+    observation.rot = ball.z;
+    kalmanUpdateZb(observation, timeStamp, cameraID);
+}
+
+
+void kalmanBall::kalmanUpdateZb(Position observation, double timeStamp, uint cameraID) {
     // if we have a ball already and the measurement is too far off we do not trust it.
     if (visibility != NOT_VISIBLE) {
         //HAck
-        float errorx = ball.pos.x - this->X(0);
-        float errory = ball.pos.y - this->X(2);
-        if (errorx*errorx + errory*errory
-                >= 2) {
+        float errorx = observation.x - this->X(0);
+        float errory = observation.y - this->X(2);
+        if (errorx*errorx + errory*errory >= 2) {
             return;
         }
     }
@@ -24,10 +32,10 @@ void kalmanBall::kalmanUpdateZ(roboteam_msgs::DetectionBall ball, double timeSta
         std::cout<<"Jumping the ball"<<std::endl;
         this->pastObservation.clear();
         this->X.zeros();
-        this->X(0) = ball.pos.x;
-        this->X(2) = ball.pos.y;
+        this->X(0) = observation.x;
+        this->X(2) = observation.y;
     }
-    Position average = calculatePos(ball.pos, ball.z, cameraID);
+    Position average = calculatePos(observation, cameraID);
     this->cameraId = cameraID;
     this->Z(0) = average.x;
     this->Z(1) = average.y;
@@ -59,20 +67,9 @@ roboteam_msgs::WorldBall kalmanBall::as_ball_message() {
     return msg;
 }
 
-void kalmanBall::filterVel(Vector2 curVel) {
-
-    double velocityDiff = (curVel - this->oldVel).length();
-    double velForMaxFactor = 10.0;
-    double maxFactor = 1.0;
-    double factor = velocityDiff > velForMaxFactor ? maxFactor : velocityDiff/velForMaxFactor;
-    Vector2 newVel = (this->oldVel*(1 - factor) + curVel*factor);
-    this->oldVel.x = newVel.x;
-    this->oldVel.y = newVel.y;
-}
-
 void kalmanBall::kalmanUpdateX() {
     // first we update the visibility and check if the ball has been seen the last time
-    if (this->invisibleCounter>BALLEXTRAPOLATEDTIME&&visibility==EXTRAPOLATED){
+    if (this->invisibleCounter>BALLEXTRAPOLATEDTIME && this->visibility==EXTRAPOLATED){
         std::cout<<"Invisible ball! Not moving it anymore. "<<std::endl;
     }
     updateVisibility();
@@ -81,13 +78,10 @@ void kalmanBall::kalmanUpdateX() {
     // Y = Z - HX_predict
     // X_new = X_predict + Ky
 
-    if (visibility!=NOT_VISIBLE){
+    if (this->visibility!=NOT_VISIBLE){
         arma::fvec::fixed<STATEINDEX> X_predict = this->F*this->X;
-        arma::fmat::fixed<OBSERVATIONINDEX, 1> Y;
-        if (invisibleCounter<1){ // we only use the observation if we actually received one.
-            Y = this->Z - (this->H*X_predict);
-        }
-        else{
+        arma::fmat::fixed<OBSERVATIONINDEX, 1> Y = this->Z - (this->H*X_predict);
+        if (this->invisibleCounter>0){ // we only use the observation if we actually received one.
             Y.zeros();
         }
         arma::fvec::fixed<STATEINDEX> X_new = X_predict + (this->K * Y);
@@ -98,18 +92,20 @@ void kalmanBall::kalmanUpdateX() {
     }
     this->invisibleCounter += 1; // we update the amount of loops which we did without seeing the ball (this is reset to 0 if the ball is seen again).
 }
+
 bool kalmanBall::isVisible() {
-    return visibility==VISIBLE;
+    return this->visibility==VISIBLE;
 }
+
 void kalmanBall::updateVisibility() {
     if (this->invisibleCounter>BALLDISAPPEARTIME){
-        visibility=NOT_VISIBLE;
+        this->visibility=NOT_VISIBLE;
     }
     else if (this->invisibleCounter>BALLEXTRAPOLATEDTIME){
-        visibility=EXTRAPOLATED;
+        this->visibility=EXTRAPOLATED;
     }
     else{
-        visibility=VISIBLE;
+        this->visibility=VISIBLE;
     }
 }
 }
