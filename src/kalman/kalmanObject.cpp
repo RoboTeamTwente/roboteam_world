@@ -226,6 +226,9 @@ namespace rtt {
         if (rotation < 0){
             rotation += 2*M_PI;
         }
+        if (rotation<-M_PI || rotation>=M_PI){
+            rotation = -M_PI + std::numeric_limits<float>::epsilon();
+        }
         return rotation;
     }
 
