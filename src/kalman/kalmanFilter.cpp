@@ -10,10 +10,10 @@ kalmanFilter::kalmanFilter() {
     //initialise kalman objects
     lastFrameTime = - 1.0;
     for (uint i = 0; i < BOTCOUNT; ++ i) {
-        ourBots[i] = kalmanObject(i, posVar_us, stateVar_us, randVar_us, angleVar_us);
-        theirBots[i] = kalmanObject(i, posVar_them, stateVar_them, randVar_them, angleVar_them);
+        ourBots[i] = kalmanObject(i, posVar, randVar, angleVar);
+        theirBots[i] = kalmanObject(i, posVar, randVar, angleVar);
     }
-    ball = kalmanObject(INVALID_ID, posVar_ball, stateVar_ball, randVar_ball, 1);
+    ball = kalmanObject(INVALID_ID, posVar_ball, randVar_ball, 1);
 }
 
 void kalmanFilter::kalmanUpdate() {
@@ -31,17 +31,16 @@ void kalmanFilter::kalmanUpdate() {
 
 // if we get a new frame we update our observations
 void kalmanFilter::newFrame(const roboteam_msgs::DetectionFrame &msg) {
-    double timeCapture = msg.t_capture;
-    lastFrameTime = timeCapture;
+    this->lastFrameTime = msg.t_capture;
     uint cameraID = msg.camera_id;
     for (const roboteam_msgs::DetectionRobot robot : msg.us) {
-        ourBots[robot.robot_id].kalmanUpdateRobot(robot, timeCapture, cameraID);
+        ourBots[robot.robot_id].kalmanUpdateRobot(robot, cameraID);
     }
     for (const roboteam_msgs::DetectionRobot robot : msg.them) {
-        theirBots[robot.robot_id].kalmanUpdateRobot(robot, timeCapture, cameraID);
+        theirBots[robot.robot_id].kalmanUpdateRobot(robot, cameraID);
     }
-    for (const roboteam_msgs::DetectionBall detBall : msg.balls) {
-        ball.kalmanUpdateBall(detBall, timeCapture, cameraID);
+    for (const roboteam_msgs::DetectionBall Ball : msg.balls) {
+        ball.kalmanUpdateBall(Ball, cameraID);
     }
 }
 

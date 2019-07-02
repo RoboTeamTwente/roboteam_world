@@ -21,7 +21,6 @@ class kalmanObject {
 
     protected:
         uint id; //Id of the object if applicable
-        double observationTimeStamp; //Time of last observed data used to make sure old data doesn't replace new data
         int invisibleCounter; //count the ticks between observations, after a certain time the object doesn't exist anymore
         visState visibility;
         int comparisonCount;
@@ -43,7 +42,7 @@ class kalmanObject {
 
         kalmanObject();
 
-        kalmanObject(uint id, float obsVar, float stateVar, float randVar, float angleVar);
+        kalmanObject(uint id, float PosVar, float randVar, float angleVar);
 
         //updates the K till it doesn't change anymore (with wrong variance it can osscilate or grow exponetially)
         void kalmanUpdateK();
@@ -51,12 +50,12 @@ class kalmanObject {
         //If the object exists, updates the state
         virtual void kalmanUpdateX();
 
-        void kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot,double timeStamp, uint cameraID);
+        void kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot, uint cameraID);
 
-        void kalmanUpdateBall(roboteam_msgs::DetectionBall ball, double timeStamp, uint cameraID);
+        void kalmanUpdateBall(roboteam_msgs::DetectionBall ball, uint cameraID);
 
         //if the data is more recent than the current data, import the new observation data
-        void kalmanUpdateZ(Position observation,double timeStamp, uint cameraID);
+        void kalmanUpdateZ(Position observation, uint cameraID);
 
         //Get X,Y and Orientation
         Position kalmanGetPos() const;

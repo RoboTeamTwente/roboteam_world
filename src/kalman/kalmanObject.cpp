@@ -10,10 +10,9 @@ namespace rtt {
 
     }
 
-    kalmanObject::kalmanObject(uint id, float obsVar, float stateVar, float randVar, float angleVar) {
+    kalmanObject::kalmanObject(uint id, float posVar, float randVar, float angleVar) {
         //in the future data about them and us might be different so we made different classes
         this->id = id;
-        this->observationTimeStamp = -1.0;
         this->invisibleCounter = 0;
         this->visibility = NOT_VISIBLE;
         this->comparisonCount = 0;
@@ -29,16 +28,16 @@ namespace rtt {
         this->H = {{1, 0, 0, 0, 0, 0},
                    {0, 0, 1, 0, 0, 0},
                    {0, 0, 0, 0, 1, 0}};
-        this->R = {{obsVar, 0, 0},
-                   {0, obsVar, 0},
+        this->R = {{posVar, 0, 0},
+                   {0, posVar, 0},
                    {0, 0, angleVar}};
         this->I.eye();
-        this->P = {{stateVar, 0, 0, 0, 0, 0},
-                   {0, stateVar, 0, 0, 0, 0},
-                   {0, 0, stateVar, 0, 0, 0},
-                   {0, 0, 0, stateVar, 0, 0},
-                   {0, 0, 0, 0, stateVar, 0},
-                   {0, 0, 0, 0, 0, stateVar}};
+        this->P = {{posVar, 0, 0, 0, 0, 0},
+                   {0, posVar, 0, 0, 0, 0},
+                   {0, 0, posVar, 0, 0, 0},
+                   {0, 0, 0, posVar, 0, 0},
+                   {0, 0, 0, 0, angleVar, 0},
+                   {0, 0, 0, 0, 0, angleVar}};
         arma::fmat::fixed<STATEINDEX, OBSERVATIONINDEX> tempQ = {{TIMEDIFF, 0, 0},
                                                                  {1       , 0, 0},
                                                                  {0, TIMEDIFF, 0},
@@ -126,23 +125,23 @@ namespace rtt {
         this->invisibleCounter += 1; // we update the amount of loops which we did without seeing the ball (this is reset to 0 if the ball is seen again).
     }
 
-    void kalmanObject::kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot,double timeStamp, uint cameraID){
+    void kalmanObject::kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot, uint cameraID){
         Position observation;
         observation.x = robot.pos.x;
         observation.y = robot.pos.y;
         observation.rot = robot.orientation;
-        kalmanUpdateZ(observation, timeStamp, cameraID);
+        kalmanUpdateZ(observation, cameraID);
     }
 
-    void kalmanObject::kalmanUpdateBall(roboteam_msgs::DetectionBall ball, double timeStamp, uint cameraID){
+    void kalmanObject::kalmanUpdateBall(roboteam_msgs::DetectionBall ball, uint cameraID){
         Position observation;
         observation.x = ball.pos.x;
         observation.y = ball.pos.y;
         observation.rot = ball.z;
-        kalmanUpdateZ(observation, timeStamp, cameraID);
+        kalmanUpdateZ(observation, cameraID);
     }
 
-    void kalmanObject::kalmanUpdateZ(Position observation, double timeStamp, uint cameraID) {
+    void kalmanObject::kalmanUpdateZ(Position observation, uint cameraID) {
         // if we have a ball already and the measurement is too far off we do not trust it.
         if (visibility != NOT_VISIBLE) {
             //HAck
@@ -156,9 +155,9 @@ namespace rtt {
         else {
             // we found a new object so we are resetting the state. We assume it's velocity is 0.
             if (this->id == INVALID_ID) {
-                std::cout << "Adding the ball" << std::endl;
+                std::cout << "Added the ball" << std::endl;
             } else {
-                std::cout << "Adding robot id:" << this->id << std::endl;
+                std::cout << "Added robot id:" << this->id << std::endl;
             }
             this->pastObservation.clear();
             this->X.zeros();
@@ -170,9 +169,8 @@ namespace rtt {
         this->cameraId = cameraID;
         this->Z(0) = average.x;
         this->Z(1) = average.y;
-        this->Z(2) = calculateRot(average.rot);
+        this->Z(2) = calculateRot(float(average.rot));
 
-        this->observationTimeStamp = timeStamp;
         this->invisibleCounter = 0;
         this->visibility = VISIBLE;
     }
@@ -194,12 +192,12 @@ namespace rtt {
         Position pos = kalmanGetPos();
         Position vel = kalmanGetVel();
         msg.id = id;
-        msg.pos.x = pos.x;
-        msg.pos.y = pos.y;
-        msg.angle = limitRotation(pos.rot);
-        msg.vel.x = vel.x;
-        msg.vel.y = vel.y;
-        msg.w = vel.rot;
+        msg.pos.x = float(pos.x);
+        msg.pos.y = float(pos.y);
+        msg.angle = float(limitRotation(pos.rot));
+        msg.vel.x = float(vel.x);
+        msg.vel.y = float(vel.y);
+        msg.w = float(vel.rot);
         return msg;
     }
 
@@ -210,14 +208,13 @@ namespace rtt {
         Position vel = kalmanGetVel();
         // since the balls z axis is being kept in the third place of the vector it is the 'rotation' here
         msg.existence = 1;
-        msg.visible = isVisible();
-        msg.pos.x = pos.x;
-        msg.pos.y = pos.y;
-
-        msg.z = pos.rot;
-        msg.vel.x = vel.x;
-        msg.vel.y = vel.y;
-        msg.z_vel = vel.rot;
+        msg.visible = u_char(isVisible());
+        msg.pos.x = float(pos.x);
+        msg.pos.y = float(pos.y);
+        msg.z = float(pos.rot);
+        msg.vel.x = float(vel.x);
+        msg.vel.y = float(vel.y);
+        msg.z_vel = float(vel.rot);
         return msg;
     }
 
@@ -226,7 +223,7 @@ namespace rtt {
         if (rotation < 0){
             rotation += 2*M_PI;
         }
-        if (rotation<-M_PI || rotation>=M_PI){
+        if (rotation<=-M_PI || rotation>=M_PI){
             rotation = -M_PI + std::numeric_limits<float>::epsilon();
         }
         return rotation;
@@ -254,7 +251,7 @@ namespace rtt {
 
     float kalmanObject::calculateRot(float obsRot){
         float rotDiff = this->X(4)-obsRot;
-        int twists = abs(rotDiff+M_PI)/(2*M_PI);
+        int twists = int(abs(rotDiff+M_PI)/(2*M_PI));
         if (rotDiff>M_PI){
             obsRot += twists*2*M_PI;
         } else if (rotDiff<-1*M_PI) {
