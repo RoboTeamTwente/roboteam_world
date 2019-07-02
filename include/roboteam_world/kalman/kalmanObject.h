@@ -23,6 +23,7 @@ class kalmanObject {
         uint id; //Id of the object if applicable
         int invisibleCounter; //count the ticks between observations, after a certain time the object doesn't exist anymore
         visState visibility;
+        teamstate team;
         int comparisonCount;
         uint cameraId;
         std::map<int, Position> pastObservation;
@@ -42,7 +43,7 @@ class kalmanObject {
 
         kalmanObject();
 
-        kalmanObject(uint id, float PosVar, float randVar, float angleVar);
+        kalmanObject(uint id, float PosVar, float randVar, float angleVar, teamstate team);
 
         //updates the K till it doesn't change anymore (with wrong variance it can osscilate or grow exponetially)
         void kalmanUpdateK();

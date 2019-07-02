@@ -13,6 +13,7 @@ const int OBSERVATIONINDEX = 3;
 const float TIMEDIFF = 0.01;
 //the different states the objects can be in
 enum visState { NOT_VISIBLE, EXTRAPOLATED, VISIBLE };
+enum teamstate { US, THEM, BALL};
 
 // time after which objects disappear
 const float DISAPPEARTIME=float(0.5)/TIMEDIFF;//amount of ticks we wait for the object to disappear

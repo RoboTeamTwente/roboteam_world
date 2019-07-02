@@ -6,17 +6,18 @@
 #include <roboteam_msgs/DetectionRobot.h>
 namespace rtt {
 
-    kalmanObject::kalmanObject() :kalmanObject(INVALID_ID, 1, 1, 1){
+    kalmanObject::kalmanObject() :kalmanObject(INVALID_ID, 1, 1, 1, 0){
 
     }
 
-    kalmanObject::kalmanObject(uint id, float posVar, float randVar, float angleVar) {
+    kalmanObject::kalmanObject(uint id, float posVar, float randVar, float angleVar, teamstate team) {
         //in the future data about them and us might be different so we made different classes
         this->id = id;
         this->invisibleCounter = 0;
         this->visibility = NOT_VISIBLE;
         this->comparisonCount = 0;
         this->cameraId = INVALID_ID;
+        this->team = team;
         this->X.zeros();
         this->Z.zeros();
         this->F = {{1, TIMEDIFF, 0, 0,        0, 0       },
@@ -98,10 +99,12 @@ namespace rtt {
     void kalmanObject::kalmanUpdateX() {
         // first we update the visibility and check if the ball has been seen the last time
         if (this->invisibleCounter>DISAPPEARTIME && this->visibility==EXTRAPOLATED){
-            if (this->id == INVALID_ID) {
+            if (this->team == BALL) {
                 std::cout << "Ball disappeared" << std::endl;
+            } else if (this->team == US){
+                std::cout<<"Our robot id: "<< this->id <<" disappeared" <<std::endl;
             } else {
-                std::cout<<"Robot id: "<< this->id <<" disappeared" <<std::endl;
+                std::cout<<"Enemy robot id: "<< this->id <<" disappeared" <<std::endl;
             }
         }
         updateVisibility();
@@ -148,16 +151,18 @@ namespace rtt {
             float errorx = observation.x - this->X(0);
             float errory = observation.y - this->X(2);
             float dist = errorx*errorx + errory*errory;
-            if ((this->id == INVALID_ID && dist >= 1.5*1.5) || (this->id != INVALID_ID && dist >= 0.2*0.2) ) {
+            if ((this->team == BALL && dist >= 1.5*1.5) || ((this->team == US || this->team == THEM) && dist >= 0.2*0.2) ) {
                 return;
             }
         }
         else {
             // we found a new object so we are resetting the state. We assume it's velocity is 0.
-            if (this->id == INVALID_ID) {
+            if (this->team == BALL) {
                 std::cout << "Added the ball" << std::endl;
+            } else if (this->team == US){
+                std::cout << "Added our robot id:" << this->id << std::endl;
             } else {
-                std::cout << "Added robot id:" << this->id << std::endl;
+                std::cout << "Added enemy robot id:" << this->id << std::endl;
             }
             this->pastObservation.clear();
             this->X.zeros();
