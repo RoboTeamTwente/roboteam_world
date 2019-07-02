@@ -223,7 +223,10 @@ namespace rtt {
         if (rotation < 0){
             rotation += 2*M_PI;
         }
-        if (rotation<=-M_PI || rotation>=M_PI){
+        //the scale in roboteam_ai does not include M_PI
+        //this reduced it just below the limit
+        //the epsilon thing is the smallest float value
+        if (rotation<=-M_PI || rotation>M_PI){
             rotation = -M_PI + std::numeric_limits<float>::epsilon();
         }
         return rotation;
