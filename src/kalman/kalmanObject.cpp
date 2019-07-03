@@ -128,23 +128,23 @@ namespace rtt {
         this->invisibleCounter += 1; // we update the amount of loops which we did without seeing the ball (this is reset to 0 if the ball is seen again).
     }
 
-    void kalmanObject::kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot, uint cameraID){
+    void kalmanObject::kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot, uint cameraID, float timeStamp){
         Position observation;
         observation.x = robot.pos.x;
         observation.y = robot.pos.y;
         observation.rot = robot.orientation;
-        kalmanUpdateZ(observation, cameraID);
+        kalmanUpdateZ(observation, cameraID, timeStamp);
     }
 
-    void kalmanObject::kalmanUpdateBall(roboteam_msgs::DetectionBall ball, uint cameraID){
+    void kalmanObject::kalmanUpdateBall(roboteam_msgs::DetectionBall ball, uint cameraID, float timeStamp){
         Position observation;
         observation.x = ball.pos.x;
         observation.y = ball.pos.y;
         observation.rot = ball.z;
-        kalmanUpdateZ(observation, cameraID);
+        kalmanUpdateZ(observation, cameraID, timeStamp);
     }
 
-    void kalmanObject::kalmanUpdateZ(Position observation, uint cameraID) {
+    void kalmanObject::kalmanUpdateZ(Position observation, uint cameraID, float timeStamp) {
         // if we have a ball already and the measurement is too far off we do not trust it.
         if (visibility != NOT_VISIBLE) {
             //HAck
@@ -175,17 +175,20 @@ namespace rtt {
         this->Z(0) = average.x;
         this->Z(1) = average.y;
         this->Z(2) = calculateRot(float(average.rot));
+        this->omega = (average.rot - this->orientation)/(timeStamp-this->observationTimeStamp);
+        this->observationTimeStamp = timeStamp;
+        this->orientation = float(average.rot);
 
         this->invisibleCounter = 0;
         this->visibility = VISIBLE;
     }
 
     Position kalmanObject::kalmanGetPos() const{
-        return {this->X(0), this->X(2), this->X(4)};
+        return {this->X(0), this->X(2), this->orientation};
     }
 
     Position kalmanObject::kalmanGetVel() const{
-        return {this->X(1), this->X(3), this->X(5)};
+        return {this->X(1), this->X(3), this->omega};
     }
 
     bool kalmanObject::getExistence() const{

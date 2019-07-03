@@ -25,6 +25,9 @@ class kalmanObject {
         visState visibility;
         teamstate team;
         int comparisonCount;
+        float orientation; //currently the filter only filters X and Y, du to the coordinate system
+        double omega; //""
+        float observationTimeStamp;
         uint cameraId;
         std::map<int, Position> pastObservation;
 
@@ -51,12 +54,12 @@ class kalmanObject {
         //If the object exists, updates the state
         virtual void kalmanUpdateX();
 
-        void kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot, uint cameraID);
+        void kalmanUpdateRobot(roboteam_msgs::DetectionRobot robot, uint cameraID, float timeStamp);
 
-        void kalmanUpdateBall(roboteam_msgs::DetectionBall ball, uint cameraID);
+        void kalmanUpdateBall(roboteam_msgs::DetectionBall ball, uint cameraID, float timeStamp);
 
         //if the data is more recent than the current data, import the new observation data
-        void kalmanUpdateZ(Position observation, uint cameraID);
+        void kalmanUpdateZ(Position observation, uint cameraID, float timeStamp);
 
         //Get X,Y and Orientation
         Position kalmanGetPos() const;
