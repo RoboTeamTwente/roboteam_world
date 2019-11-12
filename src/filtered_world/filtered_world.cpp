@@ -68,12 +68,12 @@ namespace rtt {
     }
 
     /// Consume a message if it is fresh
-    boost::optional<proto::World> FilteredWorld::consumeMsg() {
+    std::optional<proto::World> FilteredWorld::consumeMsg() {
         if (isFresh()) {
             setFresh(false);
             return as_message();
         }
-        return boost::none;
+        return std::nullopt;
     }
 
     /// Adds a received detection frame to the buffers.
@@ -208,7 +208,7 @@ namespace rtt {
 
         // Update the predictor and get a speed vector for the ball
         predictor.update(ball_world, timestamp);
-        boost::optional<Position> ballVel = predictor.computeBallVelocity();
+        std::optional<Position> ballVel = predictor.computeBallVelocity();
 
         if (ballVel) {
             Position vel = *ballVel;
@@ -269,7 +269,7 @@ namespace rtt {
             // Send an update and discard old data for buffers used for calculations
             predictor.update(robot, our_team, timestamp);
             // compute velocity of the robot and update if received
-            boost::optional<Position> robotVel = predictor.computeRobotVelocity(bot_id, our_team);
+            std::optional<Position> robotVel = predictor.computeRobotVelocity(bot_id, our_team);
             if (robotVel) {
                 Position vel = *robotVel;
 

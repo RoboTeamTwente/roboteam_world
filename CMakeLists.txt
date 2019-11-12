@@ -5,13 +5,15 @@ project(roboteam_world)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 find_package(Armadillo REQUIRED)
+set(CMAKE_CXX_STANDARD 17)
 
 add_library(net STATIC
         src/net/netraw.cpp
         src/net/robocup_ssl_client.cpp)
 
 target_link_libraries(net
-        PUBLIC roboteam_proto)
+        PUBLIC roboteam_proto
+        gtest)
 
 add_executable(kalman_world
         src/kalman/kalman_world_main.cpp
@@ -43,5 +45,6 @@ target_link_libraries(kalman_world
         PRIVATE ${ARMADILLO_LIBRARIES}
         PRIVATE net
         PRIVATE roboteam_utils
-        PUBLIC roboteam_proto)
+        PUBLIC roboteam_proto
+        gtest)
 

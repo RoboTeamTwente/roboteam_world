@@ -4,15 +4,14 @@
 #include <map>
 #include <inttypes.h>
 #include <utility>
-#include <boost/variant.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include "robot.h"
 #include "ball.h"
 #include "roboteam_utils/Position.h"
 
 namespace rtt {
 
-const int NUM_ROBOTS = 15;
+constexpr int NUM_ROBOTS = 15;
 
 // typedef uint32_t id;
 typedef std::array<std::vector<std::pair<double, Robot>>, NUM_ROBOTS> RobotBuffer;
@@ -38,9 +37,9 @@ class Predictor {
     /// Update the buffer for the ball(s) with time stamps
     void update(const Ball& ball, double timestamp);
     /// Compute ball velocity from the ballBuf data
-    boost::optional<Position> computeBallVelocity();
+    std::optional<Position> computeBallVelocity();
     /// Compute robot velocity from ourTeamBuffer and theirTeamBuffer data
-    boost::optional<Position> computeRobotVelocity(uint id, bool our_team);
+    std::optional<Position> computeRobotVelocity(uint id, bool our_team);
 };
 
 }
