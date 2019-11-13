@@ -86,14 +86,36 @@ namespace rtt {
         float x= robot.x()/1000;
         float y= robot.y()/1000;
 
-        if (this && this->exists){
+        /**
+         * 
+         * You already access `this` before you even have this condition
+         * 
+         * this->robot would already be UB if `this` is nullptr
+         * Hence the check below is redundant
+         *
+         * /home/john/git/roboteam_own/roboteam_world/src/kalman/kalmanObject.cpp:89:13: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+            if (this && this->exists){
+                ^~~~ ~~
+            1 warning generated.
+        *   Though there's cases where you can access `this` even if it's nullptr and you won't get a segfault
+        * 
+        *   struct X{ 
+        *       void do_something() const noexcept{ std::cout << "Hello World"; }
+        *   };
+        * 
+        *   int main() {
+        *       X x{ };
+        *       x.do_something(); // ok, most likely
+        *   }
+        */
+        if (this->exists){
             float errorx = x-this->X(0);
             float errory = y-this->X(2);
             if (errorx*errorx+errory*errory >= 0.2*0.2){
                 return;
             }
-        }
-        //if the object comes into being, make the observation it's state, (to prevent jumping)
+            //if the object comes into being, make the observation it's state, (to prevent jumping)
+        } // so else?...
         if (!this->exists){
             std::cout<<"Adding bot: "<<robot.robot_id()<<std::endl;
             this->pastObservation.clear();
