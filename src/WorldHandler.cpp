@@ -25,7 +25,6 @@ void WorldHandler::start() {
 }
 
 void WorldHandler::init() {
-    world = new WorldBase();
     KF = new KalmanFilter;
     world_pub = new proto::Publisher<proto::World>(proto::WORLD_CHANNEL);
     ref_pub = new proto::Publisher<proto::SSL_Referee>(proto::REFEREE_CHANNEL);

@@ -16,7 +16,6 @@ class WorldHandler {
   proto::Publisher<proto::SSL_Referee> *ref_pub;
   proto::Publisher<proto::SSL_GeometryData> *geom_pub;
 
-  WorldBase *world;
   KalmanFilter *KF;
   RoboCupSSLClient *vision_client;
   RoboCupSSLClient *refbox_client;

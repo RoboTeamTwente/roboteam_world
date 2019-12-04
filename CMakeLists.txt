@@ -16,6 +16,7 @@ target_link_libraries(net
 add_executable(roboteam_world
         src/main.cpp
         src/WorldHandler.cpp
+        src/CompositeFilter.cpp
         src/kalman/KalmanFilter.cpp
         src/kalman/KalmanObject.cpp
         src/kalman/KalmanBall.cpp
@@ -45,6 +46,7 @@ add_executable(world_tests
         src/kalman/KalmanObject.cpp
         src/kalman/KalmanBall.cpp
         src/kalman/KalmanRobot.cpp
+        src/CompositeFilter.cpp
         test/KalmanTest.cpp
         test/main.cpp)
 
