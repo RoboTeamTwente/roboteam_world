@@ -89,7 +89,9 @@ private:
      * @param detectionRobot Robot to be applied
      */
     void applyObservation(const proto::SSL_DetectionRobot& detectionRobot);
-
+    /**
+     * Applies the feedback to the Kalman filter.
+     */
     void applyFeedback();
     /**
      * A function that casts any angle to the range [-PI,PI)

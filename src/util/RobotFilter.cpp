@@ -63,7 +63,15 @@ void RobotFilter::KalmanInit(const proto::SSL_DetectionRobot &detectionRobot) {
     startCov.at(2, 2) = startAngleNoise;//radians
     kalman = std::make_unique<Kalman>(startState, startCov);
 
-    kalman->H.eye();     // Our observations are simply what we see.
+    kalman->H.zeros();     // Our observations are simply what we see.
+    kalman->H.at(0,0) = 1;
+    kalman->H.at(1,1) = 1;
+    kalman->H.at(2,2) = 1;
+
+    kalman->Hf.zeros();
+    kalman->Hf.at(3,3) = 1;
+    kalman->Hf.at(4,4) = 1;
+    kalman->Hf.at(5,5) = 1;
 
     kalman->R.zeros();
     //TODO: collect constants somewhere
@@ -151,7 +159,7 @@ void RobotFilter::applyFeedback() {
         feedbackObservation.at(4) = feedback.y_vel();
 
         kalman->z = feedbackObservation;
-        kalman->update();
+        kalman->updateF();
     }
 
     feedbacks.clear();
