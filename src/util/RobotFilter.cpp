@@ -34,8 +34,10 @@ void RobotFilter::update(double time, bool doLastPredict) {
         }
         // We first predict the robot, and then apply the observation to calculate errors/offsets.
         predict(observation.time,true);
-        applyFeedback();
         applyObservation(observation.bot);
+        if (!feedbacks.empty()) {
+            applyFeedback();
+        }
         observations.erase(it);
     }
     if(doLastPredict){
@@ -83,6 +85,7 @@ void RobotFilter::KalmanInit(const proto::SSL_DetectionRobot &detectionRobot) {
     kalman->R.at(2,2) = rotVar;
     kalman->R.at(3,3) = velVar;
     kalman->R.at(4,4) = velVar;
+    kalman->R.at(5,5) = 999999;
 }
 
 void RobotFilter::predict(double time, bool permanentUpdate) {
