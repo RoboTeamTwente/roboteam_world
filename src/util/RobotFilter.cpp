@@ -35,6 +35,7 @@ void RobotFilter::update(double time, bool doLastPredict) {
         // We first predict the robot, and then apply the observation to calculate errors/offsets.
         predict(observation.time,true);
         applyObservation(observation.bot);
+        // Apply robot feedback to Kalman filter
         if (!feedbacks.empty()) {
             applyFeedback();
         }
@@ -65,15 +66,16 @@ void RobotFilter::KalmanInit(const proto::SSL_DetectionRobot &detectionRobot) {
     startCov.at(2, 2) = startAngleNoise;//radians
     kalman = std::make_unique<Kalman>(startState, startCov);
 
-    kalman->H.zeros();     // Our observations are simply what we see.
+    // Observation
+    kalman->H.zeros();
     kalman->H.at(0,0) = 1;
     kalman->H.at(1,1) = 1;
     kalman->H.at(2,2) = 1;
 
+    // Feedback
     kalman->Hf.zeros();
     kalman->Hf.at(3,3) = 1;
     kalman->Hf.at(4,4) = 1;
-    kalman->Hf.at(5,5) = 1;
 
     kalman->R.zeros();
     //TODO: collect constants somewhere
@@ -85,7 +87,7 @@ void RobotFilter::KalmanInit(const proto::SSL_DetectionRobot &detectionRobot) {
     kalman->R.at(2,2) = rotVar;
     kalman->R.at(3,3) = velVar;
     kalman->R.at(4,4) = velVar;
-    kalman->R.at(5,5) = 999999;
+    kalman->R.at(5,5) = 999999; // Not using angular velocity as feedback so do not trust it
 }
 
 void RobotFilter::predict(double time, bool permanentUpdate) {

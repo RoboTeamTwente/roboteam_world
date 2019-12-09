@@ -33,6 +33,11 @@ class WorldHandler {
   void start();
   void handleVisionPackets(proto::SSL_WrapperPacket &vision_packet);
   void handleRefboxPackets(proto::SSL_Referee &ref_packet) const;
+
+  /**
+   * Adds the received robot feedback to the WorldFilter.
+   * @param feedback Received robot feedback
+   */
   void handleFeedback(proto::RobotFeedback &feedback);
   void setupSSLClients();
 };

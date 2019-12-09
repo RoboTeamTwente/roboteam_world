@@ -29,8 +29,8 @@ private:
     Matrix Ptemp;
 public:
     Matrix F;// Forward model/state update matrix. Essentially a linear model of what we predict the next state will be
-    MatrixO H;// Observation model/ states how we can interpret observation as our state
-    MatrixO Hf;
+    MatrixO H;// Observation model/ states how we can interpret observation as our state, for vision observations
+    MatrixO Hf;// Observation model, for robot feedback
     Matrix Q;// Covariance of the process noise. (Amount of "Random Forces" we can expect in the process)
     MatrixOO R;// Observation Noise Covariance. Keeps track of how noisy the observations are.
     VectorO z;// Observation itself.

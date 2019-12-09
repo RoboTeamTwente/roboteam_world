@@ -15,6 +15,11 @@ namespace world {
     public:
         WorldFilter();
         void addFrame(const proto::SSL_DetectionFrame &msg);
+
+        /**
+         * Adds the received robot feedback to the corresponding robot filter
+         * @param feedback Received robot feedback
+         */
         void addFeedback(proto::RobotFeedback &feedback);
         proto::World getWorld(double time);
     private:
