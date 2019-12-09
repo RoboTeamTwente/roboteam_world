@@ -164,7 +164,7 @@ void RobotFilter::applyFeedback() {
         feedbackObservation.at(4) = feedback.y_vel();
 
         kalman->z = feedbackObservation;
-        kalman->updateF();
+        kalman->updateUsingFeedback();
     }
 
     feedbacks.clear();

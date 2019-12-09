@@ -93,7 +93,7 @@ public:
     /**
      * Updates the filter using the current feedback z that is set
      */
-    void updateF() {
+    void updateUsingFeedback() {
         VectorO y = z - (Hf * Xtemp);
         MatrixOO S = Hf * Ptemp * Hf.t() + R;
         MatrixSO K = Ptemp * Hf.t() * S.i();
