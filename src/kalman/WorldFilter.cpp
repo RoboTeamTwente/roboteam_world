@@ -61,6 +61,12 @@ namespace world {
 
     }
 
+    void WorldFilter::addFeedback(proto::RobotFeedback &feedback) {
+        for (const auto &filter : yellowBots[feedback.id()]) {
+            filter->addFeedback(feedback);
+        }
+    }
+
 //Creates a world message with the currently observed objects in it
     proto::World WorldFilter::getWorld(double time) {
         //First we update to the time we want packets at. Very important!

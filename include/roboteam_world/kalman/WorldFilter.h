@@ -3,6 +3,7 @@
 
 #include <util/RobotFilter.h>
 #include <util/BallFilter.h>
+#include <roboteam_proto/RobotFeedback.pb.h>
 #include "roboteam_utils/Position.h"
 #include "roboteam_proto/WorldRobot.pb.h"
 #include "roboteam_proto/World.pb.h"
@@ -14,6 +15,7 @@ namespace world {
     public:
         WorldFilter();
         void addFrame(const proto::SSL_DetectionFrame &msg);
+        void addFeedback(proto::RobotFeedback &feedback);
         proto::World getWorld(double time);
     private:
         void update(double time, bool extrapolateLastStep);

@@ -75,6 +75,6 @@ void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket &vision_packet) 
 }
 
 void WorldHandler::handleFeedback(proto::RobotFeedback &feedback) {
-    std::cout << feedback.x_vel() << " " << feedback.y_vel() << std::endl;
+    KF->addFeedback(feedback);
 }
 }

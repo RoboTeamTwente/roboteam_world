@@ -34,6 +34,7 @@ void RobotFilter::update(double time, bool doLastPredict) {
         }
         // We first predict the robot, and then apply the observation to calculate errors/offsets.
         predict(observation.time,true);
+        applyFeedback();
         applyObservation(observation.bot);
         observations.erase(it);
     }
@@ -68,9 +69,12 @@ void RobotFilter::KalmanInit(const proto::SSL_DetectionRobot &detectionRobot) {
     //TODO: collect constants somewhere
     const double posVar = 0.02; //variance in meters
     const double rotVar = 0.01;
+    const double velVar = 0.05;
     kalman->R.at(0,0) = posVar;
     kalman->R.at(1,1) = posVar;
     kalman->R.at(2,2) = rotVar;
+    kalman->R.at(3,3) = velVar;
+    kalman->R.at(4,4) = velVar;
 }
 
 void RobotFilter::predict(double time, bool permanentUpdate) {
@@ -134,6 +138,25 @@ void RobotFilter::applyObservation(const proto::SSL_DetectionRobot &detectionRob
     kalman->update();
 }
 
+void RobotFilter::applyFeedback() {
+    for (auto feedback : feedbacks) {
+        if (botId != feedback.id()) {
+            std::cerr<<"You're applying observations to the wrong robot!"<<std::endl;
+            return;
+        }
+
+        Kalman::VectorO feedbackObservation;
+        feedbackObservation.zeros();
+        feedbackObservation.at(3) = feedback.x_vel();
+        feedbackObservation.at(4) = feedback.y_vel();
+
+        kalman->z = feedbackObservation;
+        kalman->update();
+    }
+
+    feedbacks.clear();
+}
+
 double RobotFilter::limitAngle(double angle) const
 {
     while (angle > M_PI) {
@@ -161,6 +184,10 @@ proto::WorldRobot RobotFilter::asWorldRobot() const {
 void RobotFilter::addObservation(const proto::SSL_DetectionRobot &detectionRobot, double time) {
     observations.emplace_back(RobotObservation(time,detectionRobot));
     frameCount++;
+}
+
+void RobotFilter::addFeedback(proto::RobotFeedback &feedback) {
+    feedbacks.emplace_back(feedback);
 }
 
 double RobotFilter::distanceTo(double x, double y) const {

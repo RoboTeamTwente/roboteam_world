@@ -8,6 +8,7 @@
 
 #include <roboteam_proto/messages_robocup_ssl_detection.pb.h>
 #include <roboteam_proto/WorldRobot.pb.h>
+#include <roboteam_proto/RobotFeedback.pb.h>
 #include "KalmanFilter.h"
 
 /**
@@ -16,7 +17,7 @@
  * @date 5 November 2019
  */
 class RobotFilter {
-    typedef KalmanFilter<6,3> Kalman;
+    typedef KalmanFilter<6,6> Kalman;
 public:
     /**
      * Construct a RobotFilter.
@@ -45,6 +46,8 @@ public:
      * @param time Time the robot was observed
      */
     void addObservation(const proto::SSL_DetectionRobot& detectionRobot, double time);
+
+    void addFeedback(proto::RobotFeedback &feedback);
     /**
      * Distance of the state of the filter to a point.
      * @param x xCoordinate (in millimeters!)
@@ -86,6 +89,8 @@ private:
      * @param detectionRobot Robot to be applied
      */
     void applyObservation(const proto::SSL_DetectionRobot& detectionRobot);
+
+    void applyFeedback();
     /**
      * A function that casts any angle to the range [-PI,PI)
      * @param angle angle to be limited
@@ -102,6 +107,7 @@ private:
     int frameCount=0;
     int botId;
     std::vector<RobotObservation> observations;
+    std::vector<proto::RobotFeedback> feedbacks;
 
 };
 
