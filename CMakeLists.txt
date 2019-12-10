@@ -16,11 +16,11 @@ target_link_libraries(net
 add_executable(roboteam_world
         src/main.cpp
         src/WorldHandler.cpp
-        src/CompositeFilter.cpp
-        src/kalman/KalmanFilter.cpp
-        src/kalman/KalmanObject.cpp
-        src/kalman/KalmanBall.cpp
-        src/kalman/KalmanRobot.cpp)
+        src/filters/CompositeFilter.cpp
+        src/filters/kalman/KalmanFilter.cpp
+        src/filters/kalman/KalmanObject.cpp
+        src/filters/kalman/KalmanBall.cpp
+        src/filters/kalman/KalmanRobot.cpp)
 
 
 target_include_directories(roboteam_world
@@ -42,11 +42,12 @@ target_link_libraries(roboteam_world
 
 add_executable(world_tests
         src/WorldHandler.cpp
-        src/kalman/KalmanFilter.cpp
-        src/kalman/KalmanObject.cpp
-        src/kalman/KalmanBall.cpp
-        src/kalman/KalmanRobot.cpp
-        src/CompositeFilter.cpp
+        src/filters/kalman/KalmanFilter.cpp
+        src/filters/kalman/KalmanObject.cpp
+        src/filters/kalman/KalmanBall.cpp
+        src/filters/kalman/KalmanRobot.cpp
+        src/filters/CompositeFilter.cpp
+        src/filters/GeneralFilter.cpp
         test/KalmanTest.cpp
         test/main.cpp)
 

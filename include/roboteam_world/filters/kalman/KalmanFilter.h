@@ -5,6 +5,7 @@
 #ifndef ROBOTEAM_WORLD_KALMANFILTER_H
 #define ROBOTEAM_WORLD_KALMANFILTER_H
 
+#include <Filter.h>
 #include "KalmanObject.h"
 #include "KalmanRobot.h"
 #include "KalmanBall.h"
@@ -15,16 +16,17 @@
 namespace world {
 
 //This class is a manager for the different Kalman object classes
-class KalmanFilter {
+class KalmanFilter : public Filter {
  private:
   double lastFrameTime;
 
  public:
   KalmanFilter();
+  proto::World* filter(google::protobuf::Message* message) override;
   void kalmanUpdate();
   void newFrame(const proto::SSL_DetectionFrame &msg);
 
-  proto::World getWorld();
+  proto::World* getWorld();
   KalmanRobot blueBots[BOTCOUNT];
   KalmanRobot yellowBots[BOTCOUNT];
   KalmanBall ball;

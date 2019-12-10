@@ -3,7 +3,7 @@
 //
 
 #include "roboteam_proto/messages_robocup_ssl_detection.pb.h"
-#include <kalman/KalmanFilter.h>
+#include <filters/kalman/KalmanFilter.h>
 
 namespace world {
 
@@ -17,6 +17,13 @@ KalmanFilter::KalmanFilter() {
         blueBots[i] = KalmanRobot(i);
     }
     ball = KalmanBall();
+}
+
+proto::World* KalmanFilter::filter(google::protobuf::Message* message) {
+    auto msg = dynamic_cast<const proto::SSL_DetectionFrame *>(message);
+    newFrame(*msg);
+    kalmanUpdate();
+    return getWorld();
 }
 
 void KalmanFilter::kalmanUpdate() {
@@ -56,24 +63,24 @@ void KalmanFilter::newFrame(const proto::SSL_DetectionFrame &msg) {
 }
 
 //Creates a world message with the currently observed objects in it
-proto::World KalmanFilter::getWorld() {
+proto::World* KalmanFilter::getWorld() {
   std::lock_guard<std::mutex> lock(filterMutex);
 
-  proto::World world;
-    world.set_time(lastFrameTime);
+  proto::World *world = new proto::World();
+    world->set_time(lastFrameTime);
     for (const auto& kalmanYellowBot : yellowBots){
         if (kalmanYellowBot.getExistence()){
-            world.mutable_yellow()->Add(kalmanYellowBot.as_message());
+            world->mutable_yellow()->Add(kalmanYellowBot.as_message());
         }
     }
     for (const auto& kalmanBlueBot : blueBots){
         if (kalmanBlueBot.getExistence()){
-            world.mutable_blue()->Add(kalmanBlueBot.as_message());
+            world->mutable_blue()->Add(kalmanBlueBot.as_message());
         }
     }
 
     proto::WorldBall worldBall = ball.as_ball_message();
-    world.mutable_ball()->CopyFrom(worldBall);
+    world->mutable_ball()->CopyFrom(worldBall);
 
   return world;
 }

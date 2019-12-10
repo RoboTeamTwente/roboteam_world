@@ -16,7 +16,7 @@ class Filter {
          * @param message The current received protobuf message
          * @return The filtered protobuf message
          */
-        virtual google::protobuf::Message & filter(google::protobuf::Message &message) = 0;
+        virtual google::protobuf::Message* filter(google::protobuf::Message* message) = 0;
 };
 
 

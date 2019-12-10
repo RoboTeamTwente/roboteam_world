@@ -4,6 +4,7 @@
 #include <net/robocup_ssl_client.h>
 #include <sstream>
 #include <roboteam_utils/Timer.h>
+#include <filters/CompositeFilter.h>
 
 namespace world {
 
@@ -16,21 +17,20 @@ void WorldHandler::start() {
 
     roboteam_utils::Timer t;
     t.loop([&]() {
-      handleVisionPackets(vision_packet);
-      handleRefboxPackets(ref_packet);
-
-      KF->kalmanUpdate();
-      world_pub->send(KF->getWorld());
+      handleVisionPackets(&vision_packet);
+      handleRefboxPackets(&ref_packet);
     }, 100);
 }
 
 void WorldHandler::init() {
-    KF = new KalmanFilter;
+    worldFilter = new KalmanFilter;
+    refereeFilter = new CompositeFilter;
+    geometryFilter = new CompositeFilter;
+
     world_pub = new proto::Publisher<proto::World>(proto::WORLD_CHANNEL);
     ref_pub = new proto::Publisher<proto::SSL_Referee>(proto::REFEREE_CHANNEL);
     geom_pub = new proto::Publisher<proto::SSL_GeometryData>(proto::GEOMETRY_CHANNEL);
 }
-
 
 void WorldHandler::setupSSLClients() {
     constexpr int DEFAULT_VISION_PORT = 10006;
@@ -50,20 +50,24 @@ void WorldHandler::setupSSLClients() {
     this_thread::sleep_for(chrono::microseconds(10000));
 }
 
-void WorldHandler::handleRefboxPackets(proto::SSL_Referee &ref_packet) const {
-    while (refbox_client && refbox_client->receive(ref_packet)) {
-        ref_pub->send(ref_packet);
+void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket *vision_packet) const {
+    while (vision_client && vision_client->receive(*vision_packet)) {
+        if (vision_packet->has_detection()){
+            auto msg = dynamic_cast<proto::World*>(worldFilter->filter(vision_packet->mutable_detection()));
+            world_pub->send(*msg);
+        }
+        if (vision_packet->has_geometry()) {
+            auto msg = dynamic_cast<proto::SSL_GeometryData*>(geometryFilter->filter(vision_packet->mutable_geometry()));
+            geom_pub->send(*msg);
+        }
     }
 }
 
-void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket &vision_packet) const {
-    while (vision_client && vision_client->receive(vision_packet)) {
-        if (vision_packet.has_detection()){
-            KF->newFrame(vision_packet.detection());
-        }
-        if (vision_packet.has_geometry()) {
-            geom_pub->send(vision_packet.geometry());
-        }
+void WorldHandler::handleRefboxPackets(proto::SSL_Referee *ref_packet) const {
+    while (refbox_client && refbox_client->receive(*ref_packet)) {
+        auto msg = dynamic_cast<proto::SSL_Referee*>(refereeFilter->filter((google::protobuf::Message*) ref_packet));
+        ref_pub->send(*msg);
     }
 }
+
 }

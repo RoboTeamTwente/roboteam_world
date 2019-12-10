@@ -2,7 +2,7 @@
 // Created by kjhertenberg on 13-5-19.
 //
 
-#include <kalman/KalmanObject.h>
+#include <filters/kalman/KalmanObject.h>
 #include "roboteam_proto/messages_robocup_ssl_detection.pb.h"
 namespace world {
 

@@ -2,7 +2,7 @@
 // Created by kjhertenberg on 16-5-19.
 //
 
-#include "kalman/KalmanBall.h"
+#include "filters/kalman/KalmanBall.h"
 
 namespace world {
 KalmanBall::KalmanBall() {
