@@ -61,15 +61,9 @@ namespace world {
 
     }
 
-    void WorldFilter::addFeedback(proto::RobotFeedback &feedback, bool isYellow) {
-        if (isYellow) {
-            for (const auto &filter : yellowBots[feedback.id()]) {
-                filter->addFeedback(feedback);
-            }
-        } else {
-            for (const auto &filter : blueBots[feedback.id()]) {
-                filter->addFeedback(feedback);
-            }
+    void WorldFilter::addFeedback(proto::RobotFeedback &feedback) {
+        for (const auto &filter : yellowBots[feedback.id()]) {
+            filter->addFeedback(feedback);
         }
     }
 

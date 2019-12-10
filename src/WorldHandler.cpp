@@ -30,8 +30,7 @@ void WorldHandler::init() {
     world_pub = new proto::Publisher<proto::World>(proto::WORLD_CHANNEL);
     ref_pub = new proto::Publisher<proto::SSL_Referee>(proto::REFEREE_CHANNEL);
     geom_pub = new proto::Publisher<proto::SSL_GeometryData>(proto::GEOMETRY_CHANNEL);
-    feedback_yellow_sub = new proto::Subscriber<proto::RobotFeedback>(proto::FEEDBACK_PRIMARY_CHANNEL, &WorldHandler::handleFeedbackYellow, this);
-    feedback_blue_sub = new proto::Subscriber<proto::RobotFeedback>(proto::FEEDBACK_SECONDARY_CHANNEL, &WorldHandler::handleFeedbackBlue, this);
+    feedback_sub = new proto::Subscriber<proto::RobotFeedback>(proto::FEEDBACK_PRIMARY_CHANNEL, &WorldHandler::handleFeedback, this);
     lastPacketTime=0.0;
 }
 
@@ -75,12 +74,7 @@ void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket &vision_packet) 
     }
 }
 
-void WorldHandler::handleFeedbackYellow(proto::RobotFeedback &feedback) {
-    KF->addFeedback(feedback, true);
-}
-
-void WorldHandler::handleFeedbackBlue(proto::RobotFeedback & feedback) {
-    KF->addFeedback(feedback, false);
+void WorldHandler::handleFeedback(proto::RobotFeedback &feedback) {
+    KF->addFeedback(feedback);
 }
 }
-

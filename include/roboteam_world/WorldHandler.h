@@ -16,8 +16,7 @@ class WorldHandler {
   proto::Publisher<proto::World> *world_pub;
   proto::Publisher<proto::SSL_Referee> *ref_pub;
   proto::Publisher<proto::SSL_GeometryData> *geom_pub;
-  proto::Subscriber<proto::RobotFeedback> *feedback_yellow_sub;
-  proto::Subscriber<proto::RobotFeedback> *feedback_blue_sub;
+  proto::Subscriber<proto::RobotFeedback> *feedback_sub;
 
   double lastPacketTime;
   WorldFilter *KF;
@@ -36,16 +35,10 @@ class WorldHandler {
   void handleRefboxPackets(proto::SSL_Referee &ref_packet) const;
 
   /**
-   * Adds the received robot feedback of yellow to the WorldFilter.
-   * @param feedback Received robot feedback of yellow
+   * Adds the received robot feedback to the WorldFilter.
+   * @param feedback Received robot feedback
    */
-  void handleFeedbackYellow(proto::RobotFeedback &feedback);
-  /**
-   * Adds the received robot feedback of blue to the WorldFilter.
-   * @param feedback Received robot feedback of blue
-   */
-  void handleFeedbackBlue(proto::RobotFeedback &feedback);
-
+  void handleFeedback(proto::RobotFeedback &feedback);
   void setupSSLClients();
 };
 
