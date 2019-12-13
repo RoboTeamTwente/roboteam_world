@@ -19,8 +19,9 @@ namespace world {
         /**
          * Adds the received robot feedback to the corresponding robot filter
          * @param feedback Received robot feedback
+         * @param isYellow True if feedback is of yellow bot, false if blue
          */
-        void addFeedback(proto::RobotFeedback &feedback);
+        void addFeedback(proto::RobotFeedback &feedback, bool isYellow);
         proto::World getWorld(double time);
     private:
         void update(double time, bool extrapolateLastStep);

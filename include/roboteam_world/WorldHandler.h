@@ -3,6 +3,7 @@
 #include "roboteam_proto/messages_robocup_ssl_detection.pb.h"
 #include "roboteam_proto/World.pb.h"
 #include "roboteam_proto/RobotFeedback.pb.h"
+#include "roboteam_proto/Setting.pb.h"
 #include "roboteam_proto/Subscriber.h"
 #include <roboteam_proto/Publisher.h>
 #include <net/robocup_ssl_client.h>
@@ -17,7 +18,9 @@ class WorldHandler {
   proto::Publisher<proto::SSL_Referee> *ref_pub;
   proto::Publisher<proto::SSL_GeometryData> *geom_pub;
   proto::Subscriber<proto::RobotFeedback> *feedback_sub;
+  proto::Subscriber<proto::Setting> *settings_sub;
 
+  bool isYellow;
   double lastPacketTime;
   WorldFilter *KF;
   RoboCupSSLClient *vision_client;
@@ -39,6 +42,13 @@ class WorldHandler {
    * @param feedback Received robot feedback
    */
   void handleFeedback(proto::RobotFeedback &feedback);
+
+  /**
+   * Handles the received settings
+   * @param settings Received settings
+   */
+  void handleSettings(proto::Setting &settings);
+
   void setupSSLClients();
 };
 

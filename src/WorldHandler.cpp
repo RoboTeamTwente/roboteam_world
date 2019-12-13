@@ -1,7 +1,6 @@
 #include "WorldHandler.h"
 #include "roboteam_utils/constants.h"
 #include "roboteam_proto/messages_robocup_ssl_wrapper.pb.h"
-#include "roboteam_proto/RobotFeedback.pb.h"
 #include <net/robocup_ssl_client.h>
 #include <sstream>
 #include <roboteam_utils/Timer.h>
@@ -31,6 +30,7 @@ void WorldHandler::init() {
     ref_pub = new proto::Publisher<proto::SSL_Referee>(proto::REFEREE_CHANNEL);
     geom_pub = new proto::Publisher<proto::SSL_GeometryData>(proto::GEOMETRY_CHANNEL);
     feedback_sub = new proto::Subscriber<proto::RobotFeedback>(proto::FEEDBACK_PRIMARY_CHANNEL, &WorldHandler::handleFeedback, this);
+    settings_sub = new proto::Subscriber<proto::Setting>(proto::SETTINGS_PRIMARY_CHANNEL, &WorldHandler::handleSettings, this);
     lastPacketTime=0.0;
 }
 
@@ -75,6 +75,10 @@ void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket &vision_packet) 
 }
 
 void WorldHandler::handleFeedback(proto::RobotFeedback &feedback) {
-    KF->addFeedback(feedback);
+    KF->addFeedback(feedback, isYellow);
+}
+
+void WorldHandler::handleSettings(proto::Setting &settings) {
+    isYellow = settings.isyellow();
 }
 }
