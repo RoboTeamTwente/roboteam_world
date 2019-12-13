@@ -29,8 +29,7 @@ private:
     Matrix Ptemp;
 public:
     Matrix F;// Forward model/state update matrix. Essentially a linear model of what we predict the next state will be
-    MatrixO H;// Observation model/ states how we can interpret observation as our state, for vision observations
-    MatrixO Hf;// Observation model, for robot feedback
+    MatrixO H;// Observation model/ states how we can interpret observation as our state
     Matrix Q;// Covariance of the process noise. (Amount of "Random Forces" we can expect in the process)
     MatrixOO R;// Observation Noise Covariance. Keeps track of how noisy the observations are.
     VectorO z;// Observation itself.
@@ -54,7 +53,6 @@ public:
 
         F.eye();
         H.zeros();
-        Hf.zeros();
         Q.zeros();
         R.zeros();
         z.zeros();
@@ -88,19 +86,6 @@ public:
         Matrix Identity;
         Identity.eye();
         P = (Identity - K * H) * Ptemp;
-    };
-
-    /**
-     * Updates the filter using the current feedback z that is set
-     */
-    void updateUsingFeedback() {
-        VectorO y = z - (Hf * Xtemp);
-        MatrixOO S = Hf * Ptemp * Hf.t() + R;
-        MatrixSO K = Ptemp * Hf.t() * S.i();
-        X = Xtemp + K * y;
-        Matrix Identity;
-        Identity.eye();
-        P = (Identity - K * Hf) * Ptemp;
     };
 
     /**

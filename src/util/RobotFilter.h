@@ -46,7 +46,10 @@ public:
      * @param time Time the robot was observed
      */
     void addObservation(const proto::SSL_DetectionRobot& detectionRobot, double time);
-
+    /**
+     * Adds feedback of the robot to the filter.
+     * @param feedback Feedback of the robot
+     */
     void addFeedback(proto::RobotFeedback &feedback);
     /**
      * Distance of the state of the filter to a point.

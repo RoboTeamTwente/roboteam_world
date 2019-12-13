@@ -66,17 +66,6 @@ void RobotFilter::KalmanInit(const proto::SSL_DetectionRobot &detectionRobot) {
     startCov.at(2, 2) = startAngleNoise;//radians
     kalman = std::make_unique<Kalman>(startState, startCov);
 
-    // Observation
-    kalman->H.zeros();
-    kalman->H.at(0,0) = 1;
-    kalman->H.at(1,1) = 1;
-    kalman->H.at(2,2) = 1;
-
-    // Feedback
-    kalman->Hf.zeros();
-    kalman->Hf.at(3,3) = 1;
-    kalman->Hf.at(4,4) = 1;
-
     kalman->R.zeros();
     //TODO: collect constants somewhere
     const double posVar = 0.02; //variance in meters
@@ -147,11 +136,20 @@ void RobotFilter::applyObservation(const proto::SSL_DetectionRobot &detectionRob
     double difference=limitAngle(detectionRobot.orientation()-stateRot);
     observation.at(2) = limitedRot+difference;
 
+    kalman->H.zeros();
+    kalman->H.at(0,0) = 1;
+    kalman->H.at(1,1) = 1;
+    kalman->H.at(2,2) = 1;
+
     kalman->z=observation;
     kalman->update();
 }
 
 void RobotFilter::applyFeedback() {
+    kalman->H.zeros();
+    kalman->H.at(3,3) = 1;
+    kalman->H.at(4,4) = 1;
+
     for (auto feedback : feedbacks) {
         if (botId != feedback.id()) {
             std::cerr<<"You're applying observations to the wrong robot!"<<std::endl;
@@ -164,7 +162,7 @@ void RobotFilter::applyFeedback() {
         feedbackObservation.at(4) = feedback.y_vel();
 
         kalman->z = feedbackObservation;
-        kalman->updateUsingFeedback();
+        kalman->update();
     }
 
     feedbacks.clear();
