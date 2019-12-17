@@ -35,10 +35,7 @@ void RobotFilter::update(double time, bool doLastPredict) {
         // We first predict the robot, and then apply the observation to calculate errors/offsets.
         predict(observation.time,true);
         applyObservation(observation.bot);
-        // Apply robot feedback to Kalman filter
-        if (!feedbacks.empty()) {
-            applyFeedback();
-        }
+
         observations.erase(it);
     }
     if(doLastPredict){
@@ -145,27 +142,23 @@ void RobotFilter::applyObservation(const proto::SSL_DetectionRobot &detectionRob
     kalman->update();
 }
 
-void RobotFilter::applyFeedback() {
-    kalman->H.zeros();
-    kalman->H.at(3,3) = 1;
-    kalman->H.at(4,4) = 1;
-
-    for (auto feedback : feedbacks) {
-        if (botId != feedback.id()) {
-            std::cerr<<"You're applying observations to the wrong robot!"<<std::endl;
-            return;
-        }
-
-        Kalman::VectorO feedbackObservation;
-        feedbackObservation.zeros();
-        feedbackObservation.at(3) = feedback.x_vel();
-        feedbackObservation.at(4) = feedback.y_vel();
-
-        kalman->z = feedbackObservation;
-        kalman->update();
+void RobotFilter::applyFeedback(proto::RobotFeedback &feedback) {
+    if (botId != feedback.id()) {
+        std::cerr << "You're applying observations to the wrong robot!" << std::endl;
+        return;
     }
 
-    feedbacks.clear();
+    Kalman::VectorO feedbackObservation;
+    feedbackObservation.zeros();
+    feedbackObservation.at(3) = feedback.x_vel();
+    feedbackObservation.at(4) = feedback.y_vel();
+
+    kalman->H.zeros();
+    kalman->H.at(3, 3) = 1;
+    kalman->H.at(4, 4) = 1;
+
+    kalman->z = feedbackObservation;
+    kalman->update();
 }
 
 double RobotFilter::limitAngle(double angle) const
