@@ -98,7 +98,7 @@ namespace world {
     }
     void WorldFilter::update(double time, bool extrapolateLastStep) {
         //TODO: Find a more pretty way to write a loop like this
-        const double removeFilterTime=0.4; //Remove filters if no new observations have been added to it for this amount of time
+        const double removeFilterTime=5.0; //Remove filters if no new observations have been added to it for this amount of time
         for (auto& filtersAndId : yellowBots) {
             auto filter=filtersAndId.second.begin();
             while (filter != filtersAndId.second.end()){

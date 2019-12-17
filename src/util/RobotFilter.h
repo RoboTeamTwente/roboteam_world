@@ -110,6 +110,7 @@ private:
     void KalmanInit(const proto::SSL_DetectionRobot& detectionRobot);
     std::unique_ptr<Kalman> kalman= nullptr;
     double lastUpdateTime;
+    double lastUpdateTimeObservation;
     int frameCount=0;
     int botId;
     std::vector<RobotObservation> observations;

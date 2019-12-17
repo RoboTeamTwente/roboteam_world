@@ -18,26 +18,65 @@ bool compareObservation(const RobotFilter::RobotObservation& a, const RobotFilte
 void RobotFilter::update(double time, bool doLastPredict) {
 
     std::sort(observations.begin(),observations.end(),compareObservation); //First sort the observations in time increasing order
-    auto it=observations.begin();
-    while(it != observations.end()) {
-        auto observation=(*it);
-        //the observation is either too old (we already updated the robot) or too new and we don't need it yet.
-        if (observation.time<lastUpdateTime) {
 
-            observations.erase(it);
-            continue;
+    while (!observations.empty() || !feedbacks.empty()) {
+        if (!observations.empty() && !feedbacks.empty()) {
+            // Observations and feedback available
+            auto observation = observations[0];
+            auto feedback = feedbacks[0];
+            if (observation.time <= feedback.time()) {
+                if (observation.time < lastUpdateTime) {
+                    // Observation is too old
+                    observations.erase(observations.begin());
+                } else if (observation.time > time) {
+                    // Observation is not needed yet
+                    break;
+                } else {
+                    // Predict the robot state and apply the observation to calculate errors/offsets
+                    predict(observation.time, true);
+                    applyObservation(observation.bot);
+                    observations.erase(observations.begin());
+                    lastUpdateTimeObservation = observation.time;
+                }
+            } else {
+                if (feedback.time() < lastUpdateTime) {
+                    feedbacks.erase(feedbacks.begin());
+                } else if (feedback.time() > time) {
+                    break;
+                } else {
+                    predict(feedback.time(), true);
+                    applyFeedback(feedback);
+                    feedbacks.erase(feedbacks.begin());
+                }
+            }
+        } else if (!observations.empty()) {
+            // Only observations available
+            auto observation = observations[0];
+            if (observation.time < lastUpdateTime) {
+                observations.erase(observations.begin());
+            } else if (observation.time > time) {
+                break;
+            } else {
+                predict(observation.time, true);
+                applyObservation(observation.bot);
+                observations.erase(observations.begin());
+                lastUpdateTimeObservation = observation.time;
+            }
+        } else if (!feedbacks.empty()) {
+            // Only feedback available
+            auto feedback = feedbacks[0];
+            if (feedback.time() < lastUpdateTime) {
+                feedbacks.erase(feedbacks.begin());
+            } else if (feedback.time() > time) {
+                break;
+            } else {
+                predict(feedback.time(), true);
+                applyFeedback(feedback);
+                feedbacks.erase(feedbacks.begin());
+            }
         }
-        if(observation.time>time){
-            //relevant update, but we don't need the info yet so we skip it.
-            ++it;
-            continue;
-        }
-        // We first predict the robot, and then apply the observation to calculate errors/offsets.
-        predict(observation.time,true);
-        applyObservation(observation.bot);
-
-        observations.erase(it);
     }
+
     if(doLastPredict){
         predict(time,false);
     }
@@ -207,5 +246,5 @@ int RobotFilter::frames() const {
 }
 
 double RobotFilter::getLastFrameTime() const {
-    return lastUpdateTime;
+    return lastUpdateTimeObservation;
 }
