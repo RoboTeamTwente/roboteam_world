@@ -68,7 +68,7 @@ private:
      */
     double calculateVelocity() const;
     /**
-     * Detects a kicked ball and determines the stage of the ball model
+     * Detects a kicked ball and determines the phase of the ball model
      * @return Acceleration of the ball
      */
     double determineAcceleration();

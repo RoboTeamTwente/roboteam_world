@@ -73,7 +73,7 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     kalman->F.at(0, 2) = dt;
     kalman->F.at(1, 3) = dt;
 
-    // Two stage forward model
+    // Two phase forward model
     double acceleration = determineAcceleration();
 
     kalman->F.at(2, 2) = 1 + acceleration * dt;
@@ -151,8 +151,8 @@ double BallFilter::calculateVelocity() const {
 
 double BallFilter::determineAcceleration() {
     //TODO: Estimate values with experiments
-    const double accelerationSlide = -2.5; // First stage
-    const double accelerationRoll = -0.3; // Second stage
+    const double accelerationSlide = -2.5; // First phase
+    const double accelerationRoll = -0.3; // Second phase
 
     // Detect when ball is kicked
     const double thresholdBallKicked = 1.0; //TODO: Tune when the ball should be considered kicked
@@ -173,7 +173,7 @@ double BallFilter::determineAcceleration() {
 
     lastVelocity = velocity;
 
-    // Determines the stage
+    // Determines the phase
     const double switchRatio = 0.6; //TODO: Estimate with experiments
     if (velocity > switchRatio * kickVelocity) {
         return accelerationSlide;
