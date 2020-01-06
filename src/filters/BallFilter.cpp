@@ -73,7 +73,16 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     kalman->F.at(0, 2) = dt;
     kalman->F.at(1, 3) = dt;
 
-    //TODO: add 2 stage forward model?
+    // Two stage forward model
+    //TODO: Estimate values with experiments
+    const double accelerationSlide = -2.5;
+    const double accelerationRoll = -0.3;
+
+    double acceleration = accelerationRoll;
+
+    kalman->F.at(2, 2) = 1 + acceleration * dt;
+    kalman->F.at(3, 3) = 1 + acceleration * dt;
+
     //Set B
     kalman->B = kalman->F;
     //Set u (we have no control input at the moment)
