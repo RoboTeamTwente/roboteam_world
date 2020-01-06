@@ -62,8 +62,22 @@ private:
      * @param detectionBall Contains the initial state of the Filter.
      */
     void KalmanInit(const proto::SSL_DetectionBall &detectionBall);
+    /**
+     * Calculates the velocity of the ball
+     * @return Velocity of the ball
+     */
+    double calculateVelocity() const;
+    /**
+     * Detects a kicked ball and determines the stage of the ball model
+     * @return Acceleration of the ball
+     */
+    double determineAcceleration();
+
     std::unique_ptr<Kalman> kalman = nullptr;
     double lastPredictTime;
+    double lastVelocity;
+    double kickVelocity;
+    bool ballKicked;
     std::vector<BallObservation> observations;
 };
 

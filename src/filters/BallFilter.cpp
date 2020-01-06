@@ -74,11 +74,7 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     kalman->F.at(1, 3) = dt;
 
     // Two stage forward model
-    //TODO: Estimate values with experiments
-    const double accelerationSlide = -2.5;
-    const double accelerationRoll = -0.3;
-
-    double acceleration = accelerationRoll;
+    double acceleration = determineAcceleration();
 
     kalman->F.at(2, 2) = 1 + acceleration * dt;
     kalman->F.at(3, 3) = 1 + acceleration * dt;
@@ -145,4 +141,43 @@ void BallFilter::addObservation(const proto::SSL_DetectionBall &detectionBall, d
 bool BallFilter::ballIsVisible() const {
     //If we extrapolated the ball for longer than 0.05 seconds we mark it not visible
     return (lastPredictTime - lastUpdateTime) < 0.05;
+}
+
+double BallFilter::calculateVelocity() const {
+    double xVel = kalman->state()[2];
+    double yVel = kalman->state()[3];
+    return sqrt(xVel * xVel + yVel * yVel);
+}
+
+double BallFilter::determineAcceleration() {
+    //TODO: Estimate values with experiments
+    const double accelerationSlide = -2.5; // First stage
+    const double accelerationRoll = -0.3; // Second stage
+
+    // Detect when ball is kicked
+    const double thresholdBallKicked = 1.0; //TODO: Tune when the ball should be considered kicked
+    double velocity = calculateVelocity();
+    if (velocity - lastVelocity > thresholdBallKicked) {
+        ballKicked = true;
+        kickVelocity = velocity;
+    }
+
+    // Determine the initial velocity of the kicked ball
+    if (ballKicked) {
+        if (velocity > kickVelocity) {
+            kickVelocity = velocity;
+        } else {
+            ballKicked = false;
+        }
+    }
+
+    lastVelocity = velocity;
+
+    // Determines the stage
+    const double switchRatio = 0.6; //TODO: Estimate with experiments
+    if (velocity > switchRatio * kickVelocity) {
+        return accelerationSlide;
+    } else {
+        return accelerationRoll;
+    }
 }
