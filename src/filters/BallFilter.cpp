@@ -75,9 +75,10 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
 
     // Two phase forward model
     double acceleration = determineAcceleration();
+    double direction = atan2(kalman->state()[3], kalman->state()[2]);
 
-    kalman->F.at(2, 2) = 1 + acceleration * dt;
-    kalman->F.at(3, 3) = 1 + acceleration * dt;
+    kalman->F.at(2, 2) = 1 + cos(direction) * acceleration * dt;
+    kalman->F.at(3, 3) = 1 + sin(direction) * acceleration * dt;
 
     //Set B
     kalman->B = kalman->F;
