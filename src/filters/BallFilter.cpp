@@ -4,6 +4,7 @@
 
 #include "filters/BallFilter.h"
 #include "Scaling.h"
+#include "chip/ChipFitterSimple.h"
 
 BallFilter::BallFilter(const proto::SSL_DetectionBall &detectionBall, double detectTime, int cameraID) :
         CameraFilter(detectTime, cameraID),
@@ -99,13 +100,17 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
         lastUpdateTime = time;
     }
 }
-bool compareObservation(const BallFilter::BallObservation &a, const BallFilter::BallObservation &b) {
+bool compareObservation(const BallObservation &a, const BallObservation &b) {
     return (a.time < b.time);
 }
-void BallFilter::update(double time, bool doLastPredict) {
+void BallFilter::update(double time, bool doLastPredict, const std::map<int,proto::SSL_GeometryCameraCalibration> &cameraCalibration) {
 
     std::sort(observations.begin(), observations.end(),
               compareObservation); //First sort the observations in time increasing order
+    std::sort(allObservations.begin(), allObservations.end(),
+              compareObservation); //First sort the observations in time increasing order
+    ChipFitterSimple x;
+    x.reconstruct(allObservations,cameraCalibration);
     auto it = observations.begin();
     while (it != observations.end()) {
         auto observation = (*it);
@@ -132,6 +137,7 @@ void BallFilter::update(double time, bool doLastPredict) {
 }
 void BallFilter::addObservation(const proto::SSL_DetectionBall &detectionBall, double time, int cameraID) {
     observations.emplace_back(BallObservation(cameraID, time, detectionBall));
+    allObservations.emplace_back(BallObservation(cameraID,time,detectionBall));
 }
 bool BallFilter::ballIsVisible() const {
     //If we extrapolated the ball for longer than 0.05 seconds we mark it not visible

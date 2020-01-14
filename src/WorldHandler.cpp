@@ -59,6 +59,7 @@ void WorldHandler::handleRefboxPackets(proto::SSL_Referee &ref_packet) const {
 void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket &vision_packet) {
     while (vision_client && vision_client->receive(vision_packet)) {
         if (vision_packet.has_detection()){
+            std::cout<<"Detection"<<std::endl;
             double time=vision_packet.detection().t_capture();
             if (time>lastPacketTime){
                 lastPacketTime=time;
@@ -67,6 +68,9 @@ void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket &vision_packet) 
         }
         if (vision_packet.has_geometry()) {
             geom_pub->send(vision_packet.geometry());
+            for (int i = 0; i <vision_packet.geometry().calib_size(); ++i) {
+                worldFilter->addCamera(vision_packet.geometry().calib(i));
+            }
         }
     }
 }

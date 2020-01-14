@@ -9,16 +9,29 @@
 #include <roboteam_proto/WorldBall.pb.h>
 
 #include <utility>
+#include <roboteam_proto/messages_robocup_ssl_geometry.pb.h>
 #include "KalmanFilter.h"
 #include "CameraFilter.h"
-
+/**
+ * A struct to keep Ball Data and time as one observation.
+ */
+struct BallObservation{
+    explicit BallObservation(int cameraID,double time,proto::SSL_DetectionBall  detectionBall) :
+            cameraID(cameraID),
+            time(time),
+            ball(std::move(detectionBall))
+    {}
+    int cameraID;
+    double time;
+    proto::SSL_DetectionBall ball;
+};
 class BallFilter : public CameraFilter {
     typedef KalmanFilter<4, 2> Kalman;
 public:
     //TODO: add documentation
     explicit BallFilter(const proto::SSL_DetectionBall &detectionBall, double detectTime, int cameraID);
     void predict(double time, bool permanentUpdate, bool cameraSwitched);
-    void update(double time, bool doLastPredict);;
+    void update(double time, bool doLastPredict,const std::map<int,proto::SSL_GeometryCameraCalibration> &cameraCalibration);;
     void addObservation(const proto::SSL_DetectionBall &detectionBall, double time, int cameraID);
     /**
      * Distance of the state of the filter to a point.
@@ -36,19 +49,7 @@ public:
      * @return Returns true if the ball has been the last 0.05 seconds.
      */
     [[nodiscard]] bool ballIsVisible() const;
-    /**
-     * A struct to keep Ball Data and time as one observation.
-     */
-    struct BallObservation{
-        explicit BallObservation(int cameraID,double time,proto::SSL_DetectionBall  detectionBall) :
-                cameraID(cameraID),
-                time(time),
-                ball(std::move(detectionBall))
-        {}
-        int cameraID;
-        double time;
-        proto::SSL_DetectionBall ball;
-    };
+
 private:
     /**
      * Applies the observation to the kalman Filter at the current time the filter is at.
@@ -65,6 +66,7 @@ private:
     std::unique_ptr<Kalman> kalman = nullptr;
     double lastPredictTime;
     std::vector<BallObservation> observations;
+    std::vector<BallObservation> allObservations;
 };
 
 

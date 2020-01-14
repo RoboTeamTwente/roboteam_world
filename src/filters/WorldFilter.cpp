@@ -81,7 +81,7 @@ namespace world {
         updateRobots(blueBots, time, extrapolateLastStep, removeFilterTime);
         auto ball = balls.begin();
         while (ball != balls.end()) {
-            ball->get()->update(time, extrapolateLastStep);
+            ball->get()->update(time, extrapolateLastStep,cameras);
             if (time - ball->get()->getLastUpdateTime() > removeFilterTime) {
                 balls.erase(ball);
             } else {
@@ -125,5 +125,10 @@ namespace world {
             }
         }
         return filters[bestIndex];
+    }
+
+    void WorldFilter::addCamera(const proto::SSL_GeometryCameraCalibration &cameraCalibration) {
+        std::cout<<"Add camera"<<std::endl;
+        cameras[cameraCalibration.camera_id()]=cameraCalibration;
     }
 }

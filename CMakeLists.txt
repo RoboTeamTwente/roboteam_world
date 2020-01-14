@@ -5,7 +5,7 @@ project(roboteam_world)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 find_package(Armadillo REQUIRED)
-
+find_package(Qt5Gui REQUIRED)
 add_library(net STATIC
         src/net/netraw.cpp
         src/net/robocup_ssl_client.cpp)
@@ -24,11 +24,16 @@ add_library(worldUtils STATIC
         include/roboteam_world/filters/CameraFilter.h
         src/filters/CameraFilter.cpp
         src/filters/Scaling.h
+        src/filters/chip/ChipFitterSimple.cpp
+        src/filters/chip/ChipFitterSimple.h
         )
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PRIVATE ${ARMADILLO_LIBRARIES}
+        PRIVATE Qt5::Gui
         )
+set_property(TARGET worldUtils PROPERTY CXX_STANDARD 17)
+
 target_include_directories(worldUtils
         INTERFACE include
         PRIVATE include/roboteam_world
@@ -39,7 +44,6 @@ add_executable(roboteam_world
         src/main.cpp
         src/WorldHandler.cpp
         )
-set_property(TARGET roboteam_world PROPERTY CXX_STANDARD 17)
 
 
 target_include_directories(roboteam_world
