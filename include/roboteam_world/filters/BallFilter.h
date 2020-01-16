@@ -12,6 +12,13 @@
 #include "KalmanFilter.h"
 #include "CameraFilter.h"
 
+enum State{
+    RESTING,
+    KICKING,
+    SLIPPING,
+    ROLLING
+};
+
 class BallFilter : public CameraFilter {
     typedef KalmanFilter<4, 2> Kalman;
 public:
@@ -68,16 +75,15 @@ private:
      */
     double calculateVelocity() const;
     /**
-     * Detects a kicked ball and determines the phase of the ball model
-     * @return Acceleration of the ball
+     * Updates the state of the ball
      */
-    double determineAcceleration();
+    void updateState();
 
     std::unique_ptr<Kalman> kalman = nullptr;
     double lastPredictTime;
     double lastVelocity;
     double kickVelocity;
-    bool ballKicked;
+    State state = RESTING;
     std::vector<BallObservation> observations;
 };
 

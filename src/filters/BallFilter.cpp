@@ -67,6 +67,9 @@ double BallFilter::distanceTo(double x, double y) const {
     return sqrt(dx * dx + dy * dy);
 }
 void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched) {
+    // Update state of ball
+    updateState();
+
     double dt = time - lastUpdateTime;
     // forward model:
     kalman->F.eye();
@@ -74,7 +77,17 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     kalman->F.at(1, 3) = dt;
 
     // Two phase forward model
-    double acceleration = determineAcceleration();
+    //TODO: Tune experimentally
+    const double accelerationSlip = -4.9;
+    const double accelerationRoll = -2.9;
+
+    double acceleration = 0.0;
+    if (state == SLIPPING) {
+        acceleration = accelerationSlip;
+    } else if (state ==ROLLING) {
+        acceleration = accelerationRoll;
+    }
+
     double direction = atan2(kalman->state()[3], kalman->state()[2]);
 
     kalman->F.at(2, 2) = 1 + cos(direction) * acceleration * dt;
@@ -150,35 +163,40 @@ double BallFilter::calculateVelocity() const {
     return sqrt(xVel * xVel + yVel * yVel);
 }
 
-double BallFilter::determineAcceleration() {
-    //TODO: Estimate values with experiments
-    const double accelerationSlide = -2.5; // First phase
-    const double accelerationRoll = -0.3; // Second phase
+void BallFilter::updateState()  {
+    //TODO: Tune values
+    const double thresholdRest = 0.05;
+    const double thresholdKick = 0.3;
+    const double switchRatio = 0.67;
 
-    // Detect when ball is kicked
-    const double thresholdBallKicked = 1.0; //TODO: Tune when the ball should be considered kicked
     double velocity = calculateVelocity();
-    if (velocity - lastVelocity > thresholdBallKicked) {
-        ballKicked = true;
-        kickVelocity = velocity;
-    }
 
-    // Determine the initial velocity of the kicked ball
-    if (ballKicked) {
-        if (velocity > kickVelocity) {
-            kickVelocity = velocity;
-        } else {
-            ballKicked = false;
-        }
+    switch(state) {
+        case ROLLING:
+            if (velocity < thresholdRest) {
+                state = RESTING;
+            }
+        case RESTING:
+            if (velocity - lastVelocity >= thresholdKick) {
+                state = KICKING;
+                kickVelocity = velocity;
+            }
+            break;
+        case KICKING:
+            if (velocity >= kickVelocity) {
+                kickVelocity = velocity;
+            } else {
+                state = SLIPPING;
+            }
+            break;
+        case SLIPPING:
+            if (velocity < switchRatio * kickVelocity) {
+                state = ROLLING;
+            }
+            break;
+        default:
+            break;
     }
 
     lastVelocity = velocity;
-
-    // Determines the phase
-    const double switchRatio = 0.6; //TODO: Estimate with experiments
-    if (velocity > switchRatio * kickVelocity) {
-        return accelerationSlide;
-    } else {
-        return accelerationRoll;
-    }
 }
