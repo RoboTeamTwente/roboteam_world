@@ -12,11 +12,11 @@
 #include "KalmanFilter.h"
 #include "CameraFilter.h"
 
-enum State{
-    RESTING,
-    KICKING,
-    SLIPPING,
-    ROLLING
+enum class State{
+    RESTING = 0,
+    KICKING = 1,
+    SLIPPING = 2,
+    ROLLING = 3
 };
 
 class BallFilter : public CameraFilter {
@@ -83,7 +83,7 @@ private:
     double lastPredictTime;
     double lastVelocity;
     double kickVelocity;
-    State state = RESTING;
+    State state = State::RESTING;
     std::vector<BallObservation> observations;
 };
 

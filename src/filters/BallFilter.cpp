@@ -82,9 +82,9 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     const double accelerationRoll = -0.29;
 
     double acceleration = 0.0;
-    if (state == SLIPPING) {
+    if (state == State::SLIPPING) {
         acceleration = accelerationSlip;
-    } else if (state == ROLLING) {
+    } else if (state == State::ROLLING) {
         acceleration = accelerationRoll;
     }
 
@@ -103,7 +103,7 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     const float posNoiseKicking = 3.0;//TODO: tune
 
     // Trust less when ball is kicked and still accelerating
-    float posNoise = (state == KICKING) ? posNoiseKicking : posNoiseDefault;
+    float posNoise = (state == State::KICKING) ? posNoiseKicking : posNoiseDefault;
 
     Kalman::MatrixO G;
     G.zeros();
@@ -177,31 +177,31 @@ void BallFilter::updateState()  {
     double velocity = calculateVelocity();
 
     switch(state) {
-        case ROLLING:
+        case State::ROLLING:
             // When velocity is low, the ball rests
             if (velocity < thresholdRest) {
-                state = RESTING;
+                state = State::RESTING;
             }
-        case RESTING:
+        case State::RESTING:
             // Kick detection
             // TODO: Improve kick detection
             if (velocity - lastVelocity >= thresholdKick) {
-                state = KICKING;
+                state = State::KICKING;
                 kickVelocity = velocity;
             }
             break;
-        case KICKING:
+        case State::KICKING:
             // Update velocity during acceleration, thereafter ball starts slipping
             if (velocity >= kickVelocity) {
                 kickVelocity = velocity;
             } else {
-                state = SLIPPING;
+                state = State::SLIPPING;
             }
             break;
-        case SLIPPING:
+        case State::SLIPPING:
             // Ball starts rolling at a certain percentage of the kick velocity
             if (velocity < switchRatio * kickVelocity) {
-                state = ROLLING;
+                state = State::ROLLING;
             }
             break;
         default:
