@@ -79,12 +79,12 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     // Two phase forward model
     //TODO: Tune experimentally
     const double accelerationSlip = -4.9;
-    const double accelerationRoll = -2.9;
+    const double accelerationRoll = -0.29;
 
     double acceleration = 0.0;
     if (state == SLIPPING) {
         acceleration = accelerationSlip;
-    } else if (state ==ROLLING) {
+    } else if (state == ROLLING) {
         acceleration = accelerationRoll;
     }
 
@@ -99,7 +99,12 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
     kalman->u.zeros();
 
     //Set Q matrix
-    const float posNoise = 0.1;//TODO: tune
+    const float posNoiseDefault = 0.1;//TODO: tune
+    const float posNoiseKicking = 3.0;//TODO: tune
+
+    // Trust less when ball is kicked and still accelerating
+    float posNoise = (state == KICKING) ? posNoiseKicking : posNoiseDefault;
+
     Kalman::MatrixO G;
     G.zeros();
     G.at(0, 0) = dt * posNoise;
@@ -165,24 +170,28 @@ double BallFilter::calculateVelocity() const {
 
 void BallFilter::updateState()  {
     //TODO: Tune values
-    const double thresholdRest = 0.05;
-    const double thresholdKick = 0.3;
-    const double switchRatio = 0.67;
+    const double thresholdRest = 0.05; // Velocity at which ball is considered resting
+    const double thresholdKick = 0.1; // Velocity at which ball is considered kicked
+    const double switchRatio = 0.67; // Phase transition point from slipping to rolling
 
     double velocity = calculateVelocity();
 
     switch(state) {
         case ROLLING:
+            // When velocity is low, the ball rests
             if (velocity < thresholdRest) {
                 state = RESTING;
             }
         case RESTING:
+            // Kick detection
+            // TODO: Improve kick detection
             if (velocity - lastVelocity >= thresholdKick) {
                 state = KICKING;
                 kickVelocity = velocity;
             }
             break;
         case KICKING:
+            // Update velocity during acceleration, thereafter ball starts slipping
             if (velocity >= kickVelocity) {
                 kickVelocity = velocity;
             } else {
@@ -190,6 +199,7 @@ void BallFilter::updateState()  {
             }
             break;
         case SLIPPING:
+            // Ball starts rolling at a certain percentage of the kick velocity
             if (velocity < switchRatio * kickVelocity) {
                 state = ROLLING;
             }
