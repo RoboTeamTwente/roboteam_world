@@ -176,18 +176,18 @@ void BallFilter::updateState()  {
 
     double velocity = calculateVelocity();
 
+    // Kick detection
+    // TODO: Improve kick detection
+    if (state != State::KICKING && velocity - lastVelocity >= thresholdKick) {
+        state = State::KICKING;
+        kickVelocity = velocity;
+    }
+
     switch(state) {
         case State::ROLLING:
             // When velocity is low, the ball rests
             if (velocity < thresholdRest) {
                 state = State::RESTING;
-            }
-        case State::RESTING:
-            // Kick detection
-            // TODO: Improve kick detection
-            if (velocity - lastVelocity >= thresholdKick) {
-                state = State::KICKING;
-                kickVelocity = velocity;
             }
             break;
         case State::KICKING:
