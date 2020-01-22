@@ -29,8 +29,11 @@ notifications:
 
 script:
   # pass variables TRAVIS_BRANCH and roboteam_world to entrypoint
-  - docker run yuhanuncitgez/roboteamtwente:latest "$TRAVIS_BRANCH" roboteam_world
-  
+  - docker run -v ~/.ccache:/opt/.ccache yuhanuncitgez/roboteamtwente:latest "$TRAVIS_BRANCH" roboteam_world
+
+cache:
+  directories:
+    - ~/.ccache
 # after_success:
   # Lets not do coverage yet
   # - bash <(curl -s https://codecov.io/bash) -f roboteam_world_coverage.info.cleaned || echo "Codecov did not collect coverage reports"
