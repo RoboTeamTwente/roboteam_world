@@ -6,6 +6,25 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 find_package(Eigen3 REQUIRED)
 
+# Find programs and assign the boolean to the variables, find_program(variable binary)
+find_program(CCACHE ccache)
+find_program(GCC g++)
+find_program(CLANG clang++)
+
+# Some ccache logic
+if (CLANG)
+    set(CXX_COMPILER clang++)
+elseif (GCC)
+    set(CXX_COMPILER g++)
+endif()
+
+if (CCACHE)
+    set(CMAKE_CXX_COMPILER "/lib/ccache/bin/${CXX_COMPILER}")
+else()
+    set(CMAKE_CXX_COMPILER "/bin/${CXX_COMPILER}")
+endif()
+# end of ccache logic
+
 add_library(net STATIC
         src/net/netraw.cpp
         src/net/robocup_ssl_client.cpp)
