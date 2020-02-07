@@ -69,8 +69,8 @@ Eigen::Vector2d Camera::radialDistortionInv(Eigen::Vector2d &imagePoint) const {
     return distortedPoint;
 }
 
-double Camera::rayPlaneIntersection(Eigen::Vector3d planeOrigin, Eigen::Vector3d planeNormal, Eigen::Vector3d rayOrigin,
-        Eigen::Vector3d rayVector) const {
+double Camera::rayPlaneIntersection(const Eigen::Vector3d& planeOrigin, const Eigen::Vector3d& planeNormal, const Eigen::Vector3d& rayOrigin,
+        const Eigen::Vector3d& rayVector) const {
     return (-planeNormal).dot(rayOrigin-planeOrigin) / (planeNormal.dot(rayVector));
 }
 
