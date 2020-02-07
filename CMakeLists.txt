@@ -9,7 +9,7 @@ find_package(Eigen3 REQUIRED)
 add_library(net STATIC
         src/net/netraw.cpp
         src/net/robocup_ssl_client.cpp
-        )
+        src/ball/solvers/OneCameraLinearChip6D.cpp src/ball/solvers/OneCameraLinearChip6D.h)
 
 target_link_libraries(net
         PUBLIC roboteam_proto)
@@ -25,9 +25,9 @@ add_library(worldUtils STATIC
         include/roboteam_world/filters/CameraFilter.h
         src/filters/CameraFilter.cpp
         src/filters/Scaling.h
-        include/roboteam_world/filters/RobotObservation.h
-        include/roboteam_world/filters/BallObservation.h
-        )
+        include/roboteam_world/data/RobotObservation.h
+        include/roboteam_world/data/BallObservation.h
+        src/data/Camera.cpp include/roboteam_world/data/Camera.h)
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PRIVATE Eigen3::Eigen

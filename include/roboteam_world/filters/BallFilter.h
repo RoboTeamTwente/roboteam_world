@@ -8,7 +8,7 @@
 #include <roboteam_proto/WorldBall.pb.h>
 #include <roboteam_proto/messages_robocup_ssl_detection.pb.h>
 
-#include "BallObservation.h"
+#include "data/BallObservation.h"
 #include "CameraFilter.h"
 #include "KalmanFilter.h"
 

@@ -10,7 +10,7 @@
 
 #include "CameraFilter.h"
 #include "KalmanFilter.h"
-#include "RobotObservation.h"
+#include "data/RobotObservation.h"
 
 /**
  * A class that can filter robots and predict where they will be based on observations.
