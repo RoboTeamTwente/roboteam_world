@@ -12,7 +12,8 @@ Camera::Camera(const proto::SSL_GeometryCameraCalibration &protoCam)
                 protoCam.q2()).normalized()}, //We normalize here so we don't need to do it in calcuations repeatedly
         distortion{protoCam.distortion()},
         focalLength(protoCam.focal_length()),
-        principalPoint{Eigen::Vector2d(protoCam.principal_point_x(), protoCam.principal_point_y())} {
+        principalPoint{Eigen::Vector2d(protoCam.principal_point_x(), protoCam.principal_point_y())},
+        id{protoCam.camera_id()}{
 
 }
 Eigen::Vector2d Camera::fieldToImage(const Eigen::Vector3d& fieldPoint) const {

@@ -129,4 +129,9 @@ const std::unique_ptr<BallFilter> &WorldFilter::bestFilter(const std::vector<std
     }
     return filters[bestIndex];
 }
+void WorldFilter::addCameras(const google::protobuf::RepeatedPtrField<proto::SSL_GeometryCameraCalibration> &protoCams) {
+    for (const auto & protoCam : protoCams) {
+        cameras[protoCam.camera_id()] = Camera(protoCam);
+    }
+}
 }  // namespace world

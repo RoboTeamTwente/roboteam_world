@@ -67,6 +67,7 @@ void WorldHandler::handleVisionPackets(proto::SSL_WrapperPacket &vision_packet) 
             worldFilter->addFrame(vision_packet.detection());
         }
         if (vision_packet.has_geometry()) {
+            worldFilter->addCameras(vision_packet.geometry().calib());
             geom_pub->send(vision_packet.geometry());
         }
     }

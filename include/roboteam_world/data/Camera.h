@@ -22,6 +22,7 @@ class Camera {
         [[nodiscard]] Eigen::Vector2d radialDistortionInv(Eigen::Vector2d& imagePoint) const;
         [[nodiscard]] double rayPlaneIntersection(const Eigen::Vector3d& planeOrigin, const Eigen::Vector3d& planeNormal, const Eigen::Vector3d& rayOrigin,const Eigen::Vector3d& rayVector) const;
 
+        unsigned int id;
         double focalLength;
         Eigen::Vector2d principalPoint;
         Eigen::Vector3d position;

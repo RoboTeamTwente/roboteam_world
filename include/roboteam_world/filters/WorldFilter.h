@@ -6,6 +6,7 @@
 
 #include "filters/BallFilter.h"
 #include "filters/RobotFilter.h"
+#include "data/Camera.h"
 
 namespace world {
 
@@ -41,6 +42,7 @@ class WorldFilter {
      * You should always set this to true if you plan on using data immediately.
      */
     void update(double time, bool doLastPredict);
+    void addCameras(const google::protobuf::RepeatedPtrField<proto::SSL_GeometryCameraCalibration> &protoCams);
 
    private:
     typedef std::map<int, std::vector<std::unique_ptr<RobotFilter>>> robotMap;
@@ -50,6 +52,7 @@ class WorldFilter {
     robotMap blueBots;
     robotMap yellowBots;
     std::vector<std::unique_ptr<BallFilter>> balls;
+    std::map<int,Camera> cameras;
     static void updateRobots(robotMap &robots, double time, bool doLastPredict, double removeFilterTime);
     static void handleRobots(robotMap &robots, const google::protobuf::RepeatedPtrField<proto::SSL_DetectionRobot> &observations, double filterGrabDistance, double timeCapture,
                              uint cameraID);
