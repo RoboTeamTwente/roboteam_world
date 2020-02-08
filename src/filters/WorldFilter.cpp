@@ -4,6 +4,8 @@
 
 #include <filters/WorldFilter.h>
 #include <memory>
+#include <ball/solvers/LinearChip6D.h>
+#include <ball/solvers/RotatedLinearChip6D.h>
 #include "roboteam_proto/messages_robocup_ssl_detection.pb.h"
 
 namespace world {
@@ -23,7 +25,8 @@ void WorldFilter::addFrame(const proto::SSL_DetectionFrame &msg) {
     handleRobots(blueBots, msg.robots_blue(), filterGrabDistance, timeCapture, cameraID);
     handleBall(msg.balls(), filterGrabDistance, timeCapture, cameraID);
 }
-void WorldFilter::handleBall(const google::protobuf::RepeatedPtrField<proto::SSL_DetectionBall> &observations, const double filterGrabDistance, double timeCapture, uint cameraID) {
+void WorldFilter::handleBall(const google::protobuf::RepeatedPtrField<proto::SSL_DetectionBall> &observations,
+        const double filterGrabDistance, double timeCapture, uint cameraID) {
     for (const proto::SSL_DetectionBall &detBall : observations) {
         bool addedBall = false;
         for (const auto &filter : balls) {
@@ -32,14 +35,20 @@ void WorldFilter::handleBall(const google::protobuf::RepeatedPtrField<proto::SSL
                 addedBall = true;
             }
         }
-        if (!addedBall) {
+        if (! addedBall) {
             // We create a new filter if there is no existing filter which is reasonably close to the detection
             balls.push_back(std::make_unique<BallFilter>(detBall, timeCapture, cameraID));
         }
+        //Hack for testing
+        if (cameraID==0){
+            ballObservations.emplace_back(BallObservation(cameraID,timeCapture,detBall));
+        }
     }
 }
-void WorldFilter::handleRobots(robotMap &robots, const google::protobuf::RepeatedPtrField<proto::SSL_DetectionRobot> &observations, double filterGrabDistance, double timeCapture,
-                               uint cameraID) {
+void WorldFilter::handleRobots(robotMap &robots,
+        const google::protobuf::RepeatedPtrField<proto::SSL_DetectionRobot> &observations, double filterGrabDistance,
+        double timeCapture,
+        uint cameraID) {
     for (const proto::SSL_DetectionRobot &robot : observations) {
         bool addedBot = false;
         for (const auto &filter : robots[robot.robot_id()]) {
@@ -48,7 +57,7 @@ void WorldFilter::handleRobots(robotMap &robots, const google::protobuf::Repeate
                 addedBot = true;
             }
         }
-        if (!addedBot) {
+        if (! addedBot) {
             // We create a new filter if there is no existing filter which is reasonably close to the detection
             robots[robot.robot_id()].push_back(std::make_unique<RobotFilter>(robot, timeCapture, cameraID));
         }
@@ -62,22 +71,32 @@ proto::World WorldFilter::getWorld(double time) {
     proto::World world;
     world.set_time(time);
     for (const auto &yellowBotsOneId : yellowBots) {
-        if (!yellowBotsOneId.second.empty()) {
+        if (! yellowBotsOneId.second.empty()) {
             world.mutable_yellow()->Add(bestFilter(yellowBotsOneId.second)->asWorldRobot());
         }
     }
     for (const auto &blueBotsOneId : blueBots) {
-        if (!blueBotsOneId.second.empty()) {
+        if (! blueBotsOneId.second.empty()) {
             world.mutable_blue()->Add(bestFilter(blueBotsOneId.second)->asWorldRobot());
         }
     }
-    if (!balls.empty()) {
+    if (! balls.empty()) {
         proto::WorldBall worldBall = bestFilter(balls)->asWorldBall();
         world.mutable_ball()->CopyFrom(worldBall);
     }
     return world;
 }
 void WorldFilter::update(double time, bool doLastPredict) {
+    sort(ballObservations.begin(),ballObservations.end(),[](const BallObservation &a, const BallObservation &b){
+        return a.time<b.time;
+    });
+    if (ballObservations.size()>15){
+        LinearChip6D entity;
+        entity.solve(ballObservations,cameras);
+        RotatedLinearChip6D second;
+        second.solve(ballObservations,cameras);
+    }
+
     const double removeFilterTime = 0.4;  // Remove filters if no new observations have been added to it for this amount of time
     updateRobots(yellowBots, time, doLastPredict, removeFilterTime);
     updateRobots(blueBots, time, doLastPredict, removeFilterTime);
@@ -89,8 +108,9 @@ void WorldFilter::updateBalls(double time, bool doLastPredict, const double remo
         ball->get()->update(time, doLastPredict);
         if (time - ball->get()->getLastUpdateTime() > removeFilterTime) {
             balls.erase(ball);
-        } else {
-            ++ball;
+        }
+        else {
+            ++ ball;
         }
     }
 }
@@ -101,16 +121,17 @@ void WorldFilter::updateRobots(robotMap &robots, double time, bool doLastPredict
             filter->get()->update(time, doLastPredict);
             if (time - filter->get()->getLastUpdateTime() > removeFilterTime) {
                 botsOneId.second.erase(filter);
-            } else {
-                ++filter;
+            }
+            else {
+                ++ filter;
             }
         }
     }
 }
 const std::unique_ptr<RobotFilter> &WorldFilter::bestFilter(const std::vector<std::unique_ptr<RobotFilter>> &filters) {
     int bestIndex = 0;
-    int bestFrames = -1;
-    for (int i = 0; i < filters.size(); ++i) {
+    int bestFrames = - 1;
+    for (int i = 0; i < filters.size(); ++ i) {
         if (filters[i]->frames() > bestFrames) {
             bestFrames = filters[i]->frames();
             bestIndex = i;
@@ -120,8 +141,8 @@ const std::unique_ptr<RobotFilter> &WorldFilter::bestFilter(const std::vector<st
 }
 const std::unique_ptr<BallFilter> &WorldFilter::bestFilter(const std::vector<std::unique_ptr<BallFilter>> &filters) {
     int bestIndex = 0;
-    int bestFrames = -1;
-    for (int i = 0; i < filters.size(); ++i) {
+    int bestFrames = - 1;
+    for (int i = 0; i < filters.size(); ++ i) {
         if (filters[i]->frames() > bestFrames) {
             bestFrames = filters[i]->frames();
             bestIndex = i;
@@ -129,9 +150,10 @@ const std::unique_ptr<BallFilter> &WorldFilter::bestFilter(const std::vector<std
     }
     return filters[bestIndex];
 }
-void WorldFilter::addCameras(const google::protobuf::RepeatedPtrField<proto::SSL_GeometryCameraCalibration> &protoCams) {
+void WorldFilter::addCameras(
+        const google::protobuf::RepeatedPtrField<proto::SSL_GeometryCameraCalibration> &protoCams) {
     for (const auto & protoCam : protoCams) {
-        cameras[protoCam.camera_id()] = Camera(protoCam);
+        cameras[protoCam.camera_id()] = Camera(protoCam) ;
     }
 }
 }  // namespace world

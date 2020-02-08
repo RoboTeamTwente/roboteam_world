@@ -16,6 +16,9 @@ Camera::Camera(const proto::SSL_GeometryCameraCalibration &protoCam)
         id{protoCam.camera_id()}{
 
 }
+Eigen::Vector3d Camera::worldPos() const{
+    return position/1000.0; //SSL-vision is in mm!
+}
 Eigen::Vector2d Camera::fieldToImage(const Eigen::Vector3d& fieldPoint) const {
     //First transform the point into camera coordinates
     Eigen::Vector3d camCoorPoint = orientation*fieldPoint + translation;
@@ -73,5 +76,8 @@ Eigen::Vector2d Camera::radialDistortionInv(Eigen::Vector2d &imagePoint) const {
 double Camera::rayPlaneIntersection(const Eigen::Vector3d& planeOrigin, const Eigen::Vector3d& planeNormal, const Eigen::Vector3d& rayOrigin,
         const Eigen::Vector3d& rayVector) const {
     return (-planeNormal).dot(rayOrigin-planeOrigin) / (planeNormal.dot(rayVector));
+}
+Eigen::Quaterniond Camera::worldToCamRotation() const {
+    return orientation;
 }
 

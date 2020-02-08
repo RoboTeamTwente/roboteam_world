@@ -9,8 +9,10 @@
 #include <Eigen/Dense>
 class Camera {
     public:
-        explicit Camera(const proto::SSL_GeometryCameraCalibration& protoCam);
-
+        Camera() = default;
+        Camera(const proto::SSL_GeometryCameraCalibration& protoCam);
+        [[nodiscard]] Eigen::Vector3d worldPos() const;
+        [[nodiscard]] Eigen::Quaterniond worldToCamRotation() const;
         //All of the below functions are just Eigen3 implementations of the logic in SSL-Vision, so nothing here is really 'created' by us.
         //If you have problems understanding it I recommend looking further at camera_calibration.h in ssl-vision
         [[nodiscard]] Eigen::Vector2d fieldToImage(const Eigen::Vector3d& fieldPoint) const;

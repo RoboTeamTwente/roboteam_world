@@ -9,7 +9,7 @@ find_package(Eigen3 REQUIRED)
 add_library(net STATIC
         src/net/netraw.cpp
         src/net/robocup_ssl_client.cpp
-        src/ball/solvers/OneCameraLinearChip6D.cpp src/ball/solvers/OneCameraLinearChip6D.h)
+        )
 
 target_link_libraries(net
         PUBLIC roboteam_proto)
@@ -27,10 +27,16 @@ add_library(worldUtils STATIC
         src/filters/Scaling.h
         include/roboteam_world/data/RobotObservation.h
         include/roboteam_world/data/BallObservation.h
-        src/data/Camera.cpp include/roboteam_world/data/Camera.h)
+        src/data/Camera.cpp
+        include/roboteam_world/data/Camera.h
+        src/ball/solvers/RotatedLinearChip6D.cpp
+        include/roboteam_world/ball/solvers/RotatedLinearChip6D.h
+        src/ball/solvers/LinearChip6D.cpp
+        include/roboteam_world/ball/solvers/LinearChip6D.h
+        )
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
-        PRIVATE Eigen3::Eigen
+        PUBLIC Eigen3::Eigen
         )
 target_include_directories(worldUtils
         INTERFACE include
@@ -42,8 +48,8 @@ add_executable(roboteam_world
         src/WorldHandler.cpp
         )
 set_property(TARGET roboteam_world PROPERTY CXX_STANDARD 17)
-set_target_properties(worldUtils PROPERTIES COMPILE_FLAGS "-O3")
-set_target_properties(roboteam_world PROPERTIES COMPILE_FLAGS "-O3")
+set_target_properties(worldUtils PROPERTIES COMPILE_FLAGS "-O1")
+set_target_properties(roboteam_world PROPERTIES COMPILE_FLAGS "-O1")
 
 
 target_include_directories(roboteam_world
