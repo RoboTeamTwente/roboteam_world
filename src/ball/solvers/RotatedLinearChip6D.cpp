@@ -22,7 +22,7 @@ void RotatedLinearChip6D::solve(std::vector<BallObservation> observations,
         return;
     }
     const auto &detectionCam = cam->second;
-    Eigen::Quaterniond rotation=detectionCam.worldToCamRotation();
+    Eigen::Quaterniond rotation=detectionCam.worldToCamRotation().normalized();
     Eigen::Vector3d camPos=detectionCam.worldPos();
     Eigen::Vector3d camGravity= rotation * Eigen::Vector3d(0,0,-9.81);
     double gx = camGravity(0);
@@ -53,7 +53,7 @@ void RotatedLinearChip6D::solve(std::vector<BallObservation> observations,
         vector(i*2 + 1) = 0.5*time*time*(gy-beta*gz);
         i ++;
     }
-    Eigen::VectorXd data = matrix.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(vector);
+    Eigen::VectorXd data = matrix.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(vector); //TODO look at alternative numerical methods for speed
     Eigen::Vector3d pos(data(2),data(4),data(0));
     Eigen::Vector3d vel(data(3),data(5),data(1));
 

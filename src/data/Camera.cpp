@@ -35,7 +35,7 @@ Eigen::Vector3d Camera::imageToField(const Eigen::Vector2d& imagePoint, double a
     //Undistort the point
     Eigen::Vector2d undistortedPoint = radialDistortionInv(translatedImagePoint);
 
-    //Now we create a 3d ray on the z-axis
+    //Now we create a 3d ray on the z-axis. We assume the imaging chip is unit distance behind the lens.
     Eigen::Vector3d ray(undistortedPoint.x(),undistortedPoint.y(),1.0);
     //We compute the transformation from camera to field
     Eigen::Quaterniond fieldToCamInverse = orientation.inverse();

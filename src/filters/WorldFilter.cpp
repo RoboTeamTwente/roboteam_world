@@ -6,6 +6,8 @@
 #include <memory>
 #include <ball/solvers/LinearChip6D.h>
 #include <ball/solvers/RotatedLinearChip6D.h>
+#include <ball/solvers/LinearChip5D.h>
+#include <ball/solvers/LinearChip3D.h>
 #include "roboteam_proto/messages_robocup_ssl_detection.pb.h"
 
 namespace world {
@@ -95,6 +97,14 @@ void WorldFilter::update(double time, bool doLastPredict) {
         entity.solve(ballObservations,cameras);
         RotatedLinearChip6D second;
         second.solve(ballObservations,cameras);
+        LinearChip5D test;
+        test.binSearch(ballObservations,cameras);
+        test.solve(ballObservations,cameras,0,true);
+        LinearChip3D test2;
+        test2.binSearch(ballObservations,cameras,Eigen::Vector2d(ballObservations[0].ball.x()/1000,ballObservations[0].ball.y()/1000.0));
+        test2.solve(ballObservations,cameras,Eigen::Vector2d(ballObservations[0].ball.x()/1000,ballObservations[0].ball.y()/1000.0),0,true);
+
+        std::__throw_bad_alloc();
     }
 
     const double removeFilterTime = 0.4;  // Remove filters if no new observations have been added to it for this amount of time

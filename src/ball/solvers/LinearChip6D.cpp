@@ -3,7 +3,7 @@
 //
 
 #include "ball/solvers/LinearChip6D.h"
-#include <Eigen/Eigenvalues>
+#include <Eigen/Dense>
 void LinearChip6D::solve(std::vector<BallObservation> observations, const std::map<unsigned int, Camera> &cameras) {
     if (observations.size() < 3) {
         std::cerr << "Not enough points to create a trajectory" << std::endl;
@@ -27,8 +27,8 @@ void LinearChip6D::solve(std::vector<BallObservation> observations, const std::m
         double time = observation.time - firstTime;
         double x = observation.ball.x()/1000.0;
         double y = observation.ball.y()/1000.0;
-        double alpha = (x - camPos.x())/camPos.z();
-        double beta = (y - camPos.y())/camPos.z();
+        double alpha = (x - camPos.x())/(camPos.z()-0.021333);
+        double beta = (y - camPos.y())/(camPos.z()-0.021333);
 
         matrix(i*2, 0) = alpha;
         matrix(i*2, 1) = alpha*time;

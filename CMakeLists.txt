@@ -33,7 +33,7 @@ add_library(worldUtils STATIC
         include/roboteam_world/ball/solvers/RotatedLinearChip6D.h
         src/ball/solvers/LinearChip6D.cpp
         include/roboteam_world/ball/solvers/LinearChip6D.h
-        )
+        src/ball/solvers/LinearChip5D.cpp include/roboteam_world/ball/solvers/LinearChip5D.h src/ball/solvers/LinearChip3D.cpp include/roboteam_world/ball/solvers/LinearChip3D.h)
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PUBLIC Eigen3::Eigen

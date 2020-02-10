@@ -5,14 +5,13 @@
 #ifndef RTT_LINEARCHIP6D_H
 #define RTT_LINEARCHIP6D_H
 
-#include <Eigen/Dense>
 #include "data/BallObservation.h"
 #include "data/Camera.h"
 /**
  * @author Rolf
- * @brief: Key assumptions: Camera's are exactly pointed down, radial distortion ignored.
- *         Advantages: No need to do stupidly difficult coordinate transformations, use of multiple camera detections is easier
- *         Disadvantage: lose precision
+ * @brief: Key assumptions: Camera's are exactly pointed down!
+ *         Advantages: No need to do stupidly difficult coordinate transformations, use of multiple camera detections is possible
+ *         Disadvantage: slight loss of precision, but typically very minimal
  */
 class LinearChip6D {
     public:
