@@ -33,7 +33,7 @@ add_library(worldUtils STATIC
         include/roboteam_world/ball/solvers/RotatedLinearChip6D.h
         src/ball/solvers/LinearChip6D.cpp
         include/roboteam_world/ball/solvers/LinearChip6D.h
-        src/ball/solvers/LinearChip5D.cpp include/roboteam_world/ball/solvers/LinearChip5D.h src/ball/solvers/LinearChip3D.cpp include/roboteam_world/ball/solvers/LinearChip3D.h)
+        src/ball/solvers/LinearChip5D.cpp include/roboteam_world/ball/solvers/LinearChip5D.h src/ball/solvers/LinearChip3D.cpp include/roboteam_world/ball/solvers/LinearChip3D.h src/ball/solvers/BouncePoint.cpp src/ball/solvers/BouncePoint.h)
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PUBLIC Eigen3::Eigen
@@ -48,8 +48,8 @@ add_executable(roboteam_world
         src/WorldHandler.cpp
         )
 set_property(TARGET roboteam_world PROPERTY CXX_STANDARD 17)
-set_target_properties(worldUtils PROPERTIES COMPILE_FLAGS "-O1")
-set_target_properties(roboteam_world PROPERTIES COMPILE_FLAGS "-O1")
+set_target_properties(worldUtils PROPERTIES COMPILE_FLAGS "-O0")
+set_target_properties(roboteam_world PROPERTIES COMPILE_FLAGS "-O0")
 
 
 target_include_directories(roboteam_world
