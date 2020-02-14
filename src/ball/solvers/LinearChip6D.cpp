@@ -3,6 +3,7 @@
 //
 
 #include "ball/solvers/LinearChip6D.h"
+#include "BouncePoint.h"
 #include <Eigen/Dense>
 void LinearChip6D::solve(std::vector<BallObservation> observations, const std::map<unsigned int, Camera> &cameras) {
     if (observations.size() < 3) {
@@ -47,7 +48,11 @@ void LinearChip6D::solve(std::vector<BallObservation> observations, const std::m
         vector(i*2 + 1) = 0.5*gravity*time*time*beta + y;
         i ++;
     }
-    Eigen::VectorXd data = matrix.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(vector);
+    Eigen::VectorXd data = matrix.colPivHouseholderQr().solve(vector);
+    std::optional<BouncePoint> point=calculateBouncePoint(Eigen::Vector3d(data(2),data(4),data(0)),Eigen::Vector3d(data(3),data(5),data(1)),9.81,0.021333);
+    if (point){
+        std::cout << "bouncePos: " << (*point).bouncePos.x() <<" " << (*point).bouncePos.y() <<" time: " << (*point).bounceTime <<std::endl;
+    }
     std::cout << "time: " << observations[observations.size()-1].time - firstTime << std::endl;
     std::cout << " z_0: " << data(0);
     std::cout << " v_z: " << data(1);

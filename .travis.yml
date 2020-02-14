@@ -1,6 +1,6 @@
 # This travis image builds roboteam_suite and runs the target 'world_tests'.
 # All other repositories of roboteam_suite are set to the master branch.
-# We need all dependencies to parse the cmake files. This can be optimized later,
+# We need all dependencies to parse the cmake_modules files. This can be optimized later,
 # but with caching this is not a large performance hit anyway.
 
 language: cpp
@@ -34,7 +34,7 @@ install:
   - cd googletest
   - mkdir install
   - cd install
-  - cmake ../
+  - cmake_modules ../
   - make
   - sudo make install
 
@@ -57,8 +57,8 @@ script:
   - git checkout development  # ai has to be on development for some qt fixes
   - cd ..                     # ai has to be on development for some qt fixes
   - mv ${TRAVIS_BUILD_DIR} .
-  - mkdir cmake-build-debug && cd cmake-build-debug;
-  - cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Ninja" ..
-  - cmake --build . --target world_tests -- -j 8
+  - mkdir cmake_modules-build-debug && cd cmake_modules-build-debug;
+  - cmake_modules -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Ninja" ..
+  - cmake_modules --build . --target world_tests -- -j 8
   - cd roboteam_world
   - ./world_tests

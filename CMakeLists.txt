@@ -3,9 +3,10 @@ project(roboteam_world)
 
 # Needed for the documentation generator.
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
 
 find_package(Eigen3 REQUIRED)
-
+find_package(NLopt REQUIRED)
 add_library(net STATIC
         src/net/netraw.cpp
         src/net/robocup_ssl_client.cpp
@@ -33,10 +34,18 @@ add_library(worldUtils STATIC
         include/roboteam_world/ball/solvers/RotatedLinearChip6D.h
         src/ball/solvers/LinearChip6D.cpp
         include/roboteam_world/ball/solvers/LinearChip6D.h
-        src/ball/solvers/LinearChip5D.cpp include/roboteam_world/ball/solvers/LinearChip5D.h src/ball/solvers/LinearChip3D.cpp include/roboteam_world/ball/solvers/LinearChip3D.h src/ball/solvers/BouncePoint.cpp src/ball/solvers/BouncePoint.h)
+        src/ball/solvers/LinearChip5D.cpp
+        include/roboteam_world/ball/solvers/LinearChip5D.h
+        src/ball/solvers/LinearChip3D.cpp
+        include/roboteam_world/ball/solvers/LinearChip3D.h
+        src/ball/solvers/BouncePoint.cpp
+        src/ball/solvers/BouncePoint.h
+        src/ball/solvers/NonLinearChip6D.cpp
+        src/ball/solvers/NonLinearChip6D.h)
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PUBLIC Eigen3::Eigen
+        PUBLIC NLopt::nlopt
         )
 target_include_directories(worldUtils
         INTERFACE include

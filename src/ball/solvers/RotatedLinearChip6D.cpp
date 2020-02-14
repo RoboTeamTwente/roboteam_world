@@ -3,6 +3,7 @@
 //
 
 #include "ball/solvers/RotatedLinearChip6D.h"
+#include "BouncePoint.h"
 void RotatedLinearChip6D::solve(std::vector<BallObservation> observations,
         const std::map<unsigned int, Camera> &cameras) {
     if (observations.size() < 3) {
@@ -59,6 +60,10 @@ void RotatedLinearChip6D::solve(std::vector<BallObservation> observations,
 
     Eigen::Vector3d worldPos= rotation.inverse()*pos + camPos;
     Eigen::Vector3d worldVel= rotation.inverse()*vel;
+    std::optional<BouncePoint> point=calculateBouncePoint(worldPos,worldVel,9.81,0.021333);
+    if (point){
+        std::cout << "bouncePos: " << (*point).bouncePos.x() <<" " << (*point).bouncePos.y() <<" time: " << (*point).bounceTime <<std::endl;
+    }
     std::cout << "time: " << observations[observations.size()-1].time - firstTime << std::endl;
     std::cout << " z_0: " << worldPos(2);
     std::cout << " v_z: " << worldVel(2);

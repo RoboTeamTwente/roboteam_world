@@ -3,7 +3,7 @@
 //
 
 #include "ball/solvers/LinearChip3D.h"
-
+#include "ball/solvers/BouncePoint.h"
 double LinearChip3D::solve(std::vector<BallObservation> observations, const std::map<unsigned int, Camera> &cameras,
         Eigen::Vector2d kickPos, double timeOffset, bool print) {
     if (observations.size() < 3) {
@@ -50,6 +50,10 @@ double LinearChip3D::solve(std::vector<BallObservation> observations, const std:
         l1norm+=abs(res(j));
     }
     if(print){
+        std::optional<BouncePoint> point=calculateBouncePoint(Eigen::Vector3d(kickPos(0),kickPos(1),ballRadius),Eigen::Vector3d(data(1),data(2),data(0)),9.81,ballRadius);
+        if (point){
+            std::cout << "bouncePos: " << (*point).bouncePos.x() <<" " << (*point).bouncePos.y() <<" time: " << (*point).bounceTime +timeOffset<<std::endl;
+        }
         std::cout << "time: " << observations[observations.size() - 1].time - firstTime << " timeOffset: "<<timeOffset<<std::endl;
         std::cout << " z_0: " << ballRadius;
         std::cout << " v_z: " << data(0);
