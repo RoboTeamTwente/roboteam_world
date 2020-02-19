@@ -50,6 +50,7 @@ class WorldFilter {
     robotMap blueBots;
     robotMap yellowBots;
     std::vector<std::unique_ptr<BallFilter>> balls;
+    std::vector<BallObservation> observe;
     static void updateRobots(robotMap &robots, double time, bool doLastPredict, double removeFilterTime);
     static void handleRobots(robotMap &robots, const google::protobuf::RepeatedPtrField<proto::SSL_DetectionRobot> &observations, double filterGrabDistance, double timeCapture,
                              uint cameraID);

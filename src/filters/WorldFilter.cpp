@@ -4,6 +4,7 @@
 
 #include <filters/WorldFilter.h>
 #include <memory>
+#include <ball/detectors/FastDetector.h>
 #include "roboteam_proto/messages_robocup_ssl_detection.pb.h"
 
 namespace world {
@@ -25,6 +26,7 @@ void WorldFilter::addFrame(const proto::SSL_DetectionFrame &msg) {
 }
 void WorldFilter::handleBall(const google::protobuf::RepeatedPtrField<proto::SSL_DetectionBall> &observations, const double filterGrabDistance, double timeCapture, uint cameraID) {
     for (const proto::SSL_DetectionBall &detBall : observations) {
+        observe.push_back(BallObservation(cameraID,timeCapture,detBall));
         bool addedBall = false;
         for (const auto &filter : balls) {
             if (filter->distanceTo(detBall.x(), detBall.y()) < filterGrabDistance) {
@@ -82,6 +84,12 @@ void WorldFilter::update(double time, bool doLastPredict) {
     updateRobots(yellowBots, time, doLastPredict, removeFilterTime);
     updateRobots(blueBots, time, doLastPredict, removeFilterTime);
     updateBalls(time, doLastPredict, removeFilterTime);
+    rtt::FastDetector detector;
+    if (observe.size()>2) {
+        if (detector.detectKick(std::vector<BallObservation>(observe.end() - 3, observe.end()))) {
+            std::cout << "kicked" << std::endl;
+        }
+    }
 }
 void WorldFilter::updateBalls(double time, bool doLastPredict, const double removeFilterTime) {
     auto ball = balls.begin();
