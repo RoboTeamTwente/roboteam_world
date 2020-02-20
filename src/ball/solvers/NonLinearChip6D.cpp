@@ -83,7 +83,7 @@ void NonLinearChip6D::runOptimization() {
     std::vector<double> upperBounds = {0.3, 6, - 2.9, 4, 0.1, 4};
     algorithm.set_lower_bounds(lowerBounds);
     algorithm.set_upper_bounds(upperBounds);
-    algorithm.set_maxtime(1/200.0);
+    algorithm.set_maxtime(1.0);
     std::vector<double> initialGuess = {0.02133, 3.9, - 2.99, 0.46, - 0.00972, - 1.68};
     std::vector<double> x = initialGuess;
     double value;

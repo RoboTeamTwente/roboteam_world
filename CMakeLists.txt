@@ -3,7 +3,7 @@ project(roboteam_world)
 
 # Needed for the documentation generator.
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
 
 find_package(Eigen3 REQUIRED)
 find_package(NLopt REQUIRED)
