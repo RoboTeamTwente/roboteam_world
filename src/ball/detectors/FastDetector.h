@@ -11,7 +11,8 @@ namespace rtt{
 class FastDetector {
     public:
         bool detectKick(std::vector<BallObservation> observations);
-
+        bool noiseRect(std::vector<BallObservation> observations);
+        double RELUFunc(double value,double initial, double threshHold, double slope);
 };
 }
 

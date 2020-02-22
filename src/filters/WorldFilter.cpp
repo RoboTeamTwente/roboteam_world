@@ -86,7 +86,7 @@ void WorldFilter::update(double time, bool doLastPredict) {
     updateBalls(time, doLastPredict, removeFilterTime);
     rtt::FastDetector detector;
     if (observe.size()>2) {
-        if (detector.detectKick(std::vector<BallObservation>(observe.end() - 3, observe.end()))) {
+        if (detector.noiseRect(std::vector<BallObservation>(observe.end() - 3, observe.end()))) {
             std::cout << "kicked" << std::endl;
         }
     }
