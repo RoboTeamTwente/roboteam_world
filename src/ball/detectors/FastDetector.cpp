@@ -12,6 +12,8 @@ bool FastDetector::detectKick(std::vector<BallObservation> observations) {
     const BallObservation &first = observations.at(0);
     const BallObservation &second = observations.at(1);
     const BallObservation &third = observations.at(2);
+    assert(first.time<third.time);     //The observations should be ordered the right way
+
     Vector2 firstPos(first.ball.x(), first.ball.y());
     Vector2 secondPos(second.ball.x(), second.ball.y());
     Vector2 thirdPos(third.ball.x(), third.ball.y());
