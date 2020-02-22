@@ -10,7 +10,7 @@
 namespace rtt{
 class FastDetector {
     public:
-        bool detectKick(std::vector<BallObservation> observations);
+        bool detectKick(const std::vector<BallObservation> &observations);
 };
 }
 

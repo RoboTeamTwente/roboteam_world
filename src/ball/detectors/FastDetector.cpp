@@ -7,7 +7,7 @@
 #include <roboteam_utils/Angle.h>
 #include <roboteam_utils/Polygon.h>
 namespace rtt {
-bool FastDetector::detectKick(std::vector<BallObservation> observations) {
+bool FastDetector::detectKick(const std::vector<BallObservation> &observations) {
     assert(observations.size() == 3);
     const BallObservation &first = observations.at(0);
     const BallObservation &second = observations.at(1);
