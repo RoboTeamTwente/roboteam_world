@@ -6,7 +6,7 @@
 
 #include "filters/BallFilter.h"
 #include "filters/RobotFilter.h"
-
+#include "ball/detectors/KickDetector.h"
 namespace world {
 
 /**
@@ -50,7 +50,7 @@ class WorldFilter {
     robotMap blueBots;
     robotMap yellowBots;
     std::vector<std::unique_ptr<BallFilter>> balls;
-    std::vector<BallObservation> observe;
+    rtt::KickDetector detector;
     static void updateRobots(robotMap &robots, double time, bool doLastPredict, double removeFilterTime);
     static void handleRobots(robotMap &robots, const google::protobuf::RepeatedPtrField<proto::SSL_DetectionRobot> &observations, double filterGrabDistance, double timeCapture,
                              uint cameraID);

@@ -28,7 +28,7 @@ add_library(worldUtils STATIC
         include/roboteam_world/filters/RobotObservation.h
         include/roboteam_world/filters/BallObservation.h
         src/ball/detectors/FastDetector.cpp
-        src/ball/detectors/FastDetector.h)
+        include/roboteam_world/ball/detectors/FastDetector.h src/ball/detectors/KickDetector.cpp include/roboteam_world/ball/detectors/KickDetector.h)
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PRIVATE Eigen3::Eigen

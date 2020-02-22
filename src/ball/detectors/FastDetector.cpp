@@ -2,7 +2,7 @@
 // Created by rolf on 16-02-20.
 //
 
-#include "FastDetector.h"
+#include "ball/detectors/FastDetector.h"
 #include <roboteam_utils/Vector2.h>
 #include <roboteam_utils/Angle.h>
 #include <roboteam_utils/Polygon.h>
