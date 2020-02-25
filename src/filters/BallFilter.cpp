@@ -90,13 +90,18 @@ void BallFilter::predict(double time, bool permanentUpdate, bool cameraSwitched)
 
     double direction = atan2(kalman->state()[3], kalman->state()[2]);
 
-    kalman->F.at(2, 2) = 1 + cos(direction) * acceleration * dt;
-    kalman->F.at(3, 3) = 1 + sin(direction) * acceleration * dt;
-
+    // Deceleration is taken into account as control input
     //Set B
-    kalman->B = kalman->F;
-    //Set u (we have no control input at the moment)
+    kalman->B.zeros();
+    kalman->B.at(0, 0) = 1.0 / 2.0 * dt * dt;
+    kalman->B.at(1, 1) = 1.0 / 2.0 * dt * dt;
+    kalman->B.at(2, 0) = dt;
+    kalman->B.at(3, 1) = dt;
+
+    //Set u
     kalman->u.zeros();
+    kalman->u.at(0) = cos(direction) * acceleration;
+    kalman->u.at(1) = sin(direction) * acceleration;
 
     //Set Q matrix
     const float posNoiseDefault = 0.1;//TODO: tune
