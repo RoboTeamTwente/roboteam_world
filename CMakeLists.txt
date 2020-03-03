@@ -28,7 +28,10 @@ add_library(worldUtils STATIC
         include/roboteam_world/filters/RobotObservation.h
         include/roboteam_world/filters/BallObservation.h
         src/ball/detectors/FastDetector.cpp
-        include/roboteam_world/ball/detectors/FastDetector.h src/ball/detectors/KickDetector.cpp include/roboteam_world/ball/detectors/KickDetector.h)
+        include/roboteam_world/ball/detectors/FastDetector.h
+        src/ball/detectors/KickDetector.cpp
+        include/roboteam_world/ball/detectors/KickDetector.h
+        )
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PRIVATE Eigen3::Eigen
@@ -44,8 +47,8 @@ add_executable(roboteam_world
         src/WorldHandler.cpp
         )
 set_property(TARGET roboteam_world PROPERTY CXX_STANDARD 17)
-set_target_properties(worldUtils PROPERTIES COMPILE_FLAGS "-Og")
-set_target_properties(roboteam_world PROPERTIES COMPILE_FLAGS "-Og")
+set_target_properties(worldUtils PROPERTIES COMPILE_FLAGS "-O3")
+set_target_properties(roboteam_world PROPERTIES COMPILE_FLAGS "-O3")
 
 
 target_include_directories(roboteam_world

@@ -27,7 +27,7 @@ void WorldFilter::addFrame(const proto::SSL_DetectionFrame &msg) {
 void WorldFilter::handleBall(const google::protobuf::RepeatedPtrField<proto::SSL_DetectionBall> &observations,
         const double filterGrabDistance, double timeCapture, uint cameraID) {
     for (const proto::SSL_DetectionBall &detBall : observations) {
-        detector.addObservation(BallObservation(cameraID, timeCapture, detBall));
+
         bool addedBall = false;
         for (const auto &filter : balls) {
             if (filter->distanceTo(detBall.x(), detBall.y()) < filterGrabDistance) {
@@ -87,9 +87,7 @@ void WorldFilter::update(double time, bool doLastPredict) {
     updateRobots(yellowBots, time, doLastPredict, removeFilterTime);
     updateRobots(blueBots, time, doLastPredict, removeFilterTime);
     updateBalls(time, doLastPredict, removeFilterTime);
-    if (detector.detectKick()) {
-        std::cout << "kicked" << std::endl;
-    }
+
 }
 void WorldFilter::updateBalls(double time, bool doLastPredict, const double removeFilterTime) {
     auto ball = balls.begin();
