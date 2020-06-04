@@ -20,19 +20,12 @@ target_link_libraries(net
         PUBLIC roboteam_proto)
 
 add_library(worldUtils STATIC
-        include/roboteam_world/filters/KalmanFilter.h
-        include/roboteam_world/filters/WorldFilter.h
         src/filters/WorldFilter.cpp
-        include/roboteam_world/filters/RobotFilter.h
         src/filters/RobotFilter.cpp
-        include/roboteam_world/filters/BallFilter.h
         src/filters/BallFilter.cpp
-        include/roboteam_world/filters/CameraFilter.h
         src/filters/CameraFilter.cpp
-        src/filters/Scaling.h
-        include/roboteam_world/filters/RobotObservation.h
-        include/roboteam_world/filters/BallObservation.h
         )
+
 target_link_libraries(worldUtils
         PUBLIC roboteam_proto
         PRIVATE Eigen3::Eigen
@@ -79,19 +72,9 @@ target_include_directories(world_tests
 
 
 
-if (UNIX AND NOT APPLE)
-    target_link_libraries(world_tests
-            PRIVATE net
-            PRIVATE roboteam_utils
-            PRIVATE gtest
-            PUBLIC roboteam_proto)
-endif ()
+target_link_libraries(world_tests
+        PRIVATE net
+        PRIVATE roboteam_utils
+        PRIVATE gtest
+        PUBLIC roboteam_proto)
 
-if (APPLE)
-    target_link_libraries(world_tests
-            PRIVATE net
-            PRIVATE roboteam_utils
-            PUBLIC roboteam_proto
-            /usr/local/lib/libgtest.a
-            /usr/local/lib/libgtest_main.a)
-endif ()
