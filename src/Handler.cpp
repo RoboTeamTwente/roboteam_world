@@ -36,7 +36,7 @@ void Handler::init() {
 }
 
 void Handler::setupSSLClients() {
-    constexpr int DEFAULT_VISION_PORT = 10006;
+    constexpr int DEFAULT_VISION_PORT = 10020;
     constexpr int DEFAULT_REFEREE_PORT = 10003;
 
     const string SSL_VISION_SOURCE_IP = "224.5.23.2";
