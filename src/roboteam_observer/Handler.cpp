@@ -23,6 +23,7 @@ void Handler::start() {
 
             auto state = observer.process(Time::now(),vision_packets,referee_packets,robothub_info); //TODO: fix time extrapolation
             while(!pub_state->send(state)); //TODO: try sending for a max limit amount of times
+            std::cout << "[Observer] State sent! # robots = y:" << state.last_seen_world().yellow().size() << " b:" << state.last_seen_world().blue().size() << std::endl;
         },
         100);
 }
@@ -58,6 +59,11 @@ std::vector<proto::SSL_WrapperPacket> Handler::receiveVisionPackets() {
     bool ok = vision_client->receive(receivedPackets);
     if(!ok){
       std::cout<<"error receiving vision messages"<<std::endl;
+    }
+    std::cout << "[receiveVisionPackets] packets : " << receivedPackets.size() << std::endl;
+    if( 0 < receivedPackets.size() ){
+        std::cout << "BREAK!" << std::endl;
+        const proto::SSL_WrapperPacket packet = receivedPackets.front();
     }
     return receivedPackets;
 }
