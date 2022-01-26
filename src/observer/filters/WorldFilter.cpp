@@ -78,11 +78,30 @@ proto::World WorldFilter::getWorld() {
         proto::WorldBall worldBall = bestFilter(balls)->asWorldBall();
         world.mutable_ball()->CopyFrom(worldBall);
     }
-    for (auto feedback : feedbackFilter.getData(true)) {
-        world.mutable_yellowfeedback()->Add(std::move(feedback));
-    }
-    for (auto feedback : feedbackFilter.getData(false)) {
-        world.mutable_bluefeedback()->Add(std::move(feedback));
+    if(!balls.empty()){
+        const auto& ballPos = world.ball().pos();
+        for(const auto& robot : world.yellow()){
+            auto robotFeedback = feedbackFilter.getDataFilteredBallPos(true,robot,ballPos);
+            if(robotFeedback.has_value()){
+                proto::RobotFeedback feedback = *robotFeedback;
+                world.mutable_yellowfeedback()->Add(std::move(feedback));
+            }
+        }
+        for(const auto& robot : world.blue()){
+            auto robotFeedback = feedbackFilter.getDataFilteredBallPos(false,robot,ballPos);
+            if(robotFeedback.has_value()){
+                proto::RobotFeedback feedback = *robotFeedback;
+                world.mutable_bluefeedback()->Add(std::move(feedback));
+            }
+        }
+
+    }else{
+        for (auto feedback : feedbackFilter.getData(true)) {
+            world.mutable_yellowfeedback()->Add(std::move(feedback));
+        }
+        for (auto feedback : feedbackFilter.getData(false)) {
+            world.mutable_bluefeedback()->Add(std::move(feedback));
+        }
     }
     return world;
 }
