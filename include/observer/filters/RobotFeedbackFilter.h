@@ -25,7 +25,7 @@ class RobotFeedbackFilter {
      * @return
      */
     [[nodiscard]] std::optional<proto::RobotFeedback> getDataFilteredBallPos(bool teamIsYellow, const proto::WorldRobot& robot,
-                                                                             const proto::Vector2& ballPos);
+                                                                             const proto::Vector2f& ballPos);
 };
 
 #endif  // RTT_ROBOTFEEDBACKFILTER_H
