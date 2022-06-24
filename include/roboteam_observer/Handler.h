@@ -12,7 +12,7 @@
 #include <memory>
 #include <vector>
 #include <exception>
-
+#include <fstream>
 
 class Handler {
    private:
@@ -25,14 +25,22 @@ class Handler {
     Observer observer;
     std::vector<rtt::RobotsFeedback> receivedRobotData;
     std::mutex sub_mutex;
+
+    std::ofstream blueTeamLogger;
+    std::ofstream yellowTeamLogger;
+
+    void logWorldRobots(const proto::World&);
    public:
-    Handler() = default;
+    explicit Handler(bool shouldLog);
+    ~Handler();
 
     /*
      * Setup a world with a kalmanfilter, and initialize the publishers for publishing data.
      */
     bool initializeNetworkers();
     bool setupSSLClients();
+    // Sets up log files. Returns success
+    bool setupLogFiles();
 
     void start();
     std::vector<proto::SSL_WrapperPacket> receiveVisionPackets();

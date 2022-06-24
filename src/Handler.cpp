@@ -1,9 +1,24 @@
 #include "Handler.h"
 
+#include <roboteam_utils/Time.h>
 #include <roboteam_utils/Timer.h>
 #include <sstream>
 #include <algorithm>
 #include <proto/messages_robocup_ssl_wrapper.pb.h>
+
+constexpr char MARPLE_DELIMITER = ',';
+constexpr char ROBOT_LOG_MARPLE_HEADER[] = "time,id,posX,posY,angle,velX,velY,angleVel,hasBall,ballPos,sensorWorks,xSensCalibrated,capCharged,battery,signal";
+
+Handler::Handler(bool shouldLog) {
+    if (shouldLog) {
+        if (!this->setupLogFiles())
+            throw std::runtime_error("Failed to open file(s) for logging");
+    }
+}
+Handler::~Handler() {
+    this->blueTeamLogger.close();
+    this->yellowTeamLogger.close();
+}
 
 void Handler::start() {
     if (!initializeNetworkers()) {
@@ -26,10 +41,12 @@ void Handler::start() {
             }
 
             auto state = observer.process(vision_packets,referee_packets,robothub_info); //TODO: fix time extrapolation
-            std::cout<<robothub_info.size()<<" packets\n";
-            if(robothub_info.size() > 0){
-                state.PrintDebugString();
-            }
+
+            t.limit([&]() {
+                this->logWorldRobots(state.last_seen_world());
+            },
+            60);
+
             std::size_t iterations = 0;
             bool sent = false;
             while(iterations < 10){
@@ -76,6 +93,56 @@ bool Handler::setupSSLClients() {
     std::this_thread::sleep_for(std::chrono::microseconds(10000));
 
     return success;
+}
+
+bool Handler::setupLogFiles() {
+    auto time = Time::getDate('-') + "_" + Time::getTime('-');
+    auto suffix = "_MARPLE.csv";
+
+    this->blueTeamLogger.open("BLUE_TEAM_" + time + suffix);
+    this->yellowTeamLogger.open("YELLOW_TEAM_" + time + suffix);
+
+    if (!this->blueTeamLogger.is_open() || !this->yellowTeamLogger.is_open()) {
+        return false;
+    }
+
+    // Add headers to explain values and add std::fixed to floating points are not in scientific notation
+    this->blueTeamLogger << ROBOT_LOG_MARPLE_HEADER << std::fixed << std::endl;
+    this->yellowTeamLogger << ROBOT_LOG_MARPLE_HEADER << std::fixed << std::endl;
+    return true;
+}
+
+void writeRobotToStream(const proto::WorldRobot& bot, long time, std::ofstream& stream) {
+    // time,id,posX,posY,angle,velX,velY,angleVel,hasBall,ballPos,sensorWorks,xSensCalibrated,capCharged,battery,signal
+    stream
+        << time << MARPLE_DELIMITER
+        << bot.id() << MARPLE_DELIMITER
+        << bot.pos().x() << MARPLE_DELIMITER
+        << bot.pos().y() << MARPLE_DELIMITER
+        << bot.angle() << MARPLE_DELIMITER
+        << bot.vel().x() << MARPLE_DELIMITER
+        << bot.vel().y() << MARPLE_DELIMITER
+        << bot.w() << MARPLE_DELIMITER
+        << bot.feedbackinfo().has_ball() << MARPLE_DELIMITER
+        << bot.feedbackinfo().ball_position() << MARPLE_DELIMITER
+        << bot.feedbackinfo().ball_sensor_is_working() << MARPLE_DELIMITER
+        << bot.feedbackinfo().xsens_is_calibrated() << MARPLE_DELIMITER
+        << bot.feedbackinfo().capacitor_is_charged() << MARPLE_DELIMITER
+        << bot.feedbackinfo().battery_level() << MARPLE_DELIMITER
+        << bot.feedbackinfo().signal_strength() << std::endl;
+}
+
+void Handler::logWorldRobots(const proto::World& world) {
+    if (!this->blueTeamLogger.is_open() || !this->yellowTeamLogger.is_open()) return;
+
+    auto now = std::chrono::system_clock::now().time_since_epoch().count();
+
+    for (const auto& robot : world.blue()) {
+        writeRobotToStream(robot, now, this->blueTeamLogger);
+    }
+    for (const auto& robot : world.yellow()) {
+        writeRobotToStream(robot, now, this->yellowTeamLogger);
+    }
 }
 
 std::vector<proto::SSL_WrapperPacket> Handler::receiveVisionPackets() {
