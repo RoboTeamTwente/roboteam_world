@@ -4,6 +4,39 @@
 #include <sstream>
 #include <algorithm>
 #include <proto/messages_robocup_ssl_wrapper.pb.h>
+#include "roboteam_utils/FileLogger.hpp"
+#include "chrono"
+
+auto yellowLogger = rtt::FileLogger(Time::getDate('-') + "_" + Time::getTime('-') + "YELLOW_ROBOTS.TXT");
+auto blueLogger = rtt::FileLogger(Time::getDate('-') + "_" + Time::getTime('-') + "BLUE_ROBOTS.TXT");
+
+void logRobots(const proto::State& state) {
+    std::string timeStr = Time::getTimeWithMilliseconds(':');
+
+    // Log yellow robot states
+    std::stringstream ss;
+    for (const auto &robot : state.command_extrapolated_world().yellow()) {
+        yellowLogger << "[" << timeStr << "] {"
+           << " id: " << robot.id()
+           << ", vel: { " << robot.vel().x() << ", " << robot.vel().y() << "}"
+           << ", pos: { " << robot.pos().x() << ", " << robot.pos().y() << "}"
+           << ", angle: " << robot.angle()
+           << ", w: " << robot.w()
+           << " }" << std::endl;
+    }
+
+    // Log blue robot states
+    std::stringstream ss2;
+    for (const auto &robot : state.command_extrapolated_world().blue()) {
+        blueLogger << "[" << timeStr << "] {"
+            << " id: " << robot.id()
+            << ", vel: { " << robot.vel().x() << ", " << robot.vel().y() << "}"
+            << ", pos: { " << robot.pos().x() << ", " << robot.pos().y() << "}"
+            << ", angle: " << robot.angle()
+            << ", w: " << robot.w()
+            << " }" << std::endl;
+    }
+}
 
 void Handler::start() {
     if (!initializeNetworkers()) {
@@ -26,6 +59,7 @@ void Handler::start() {
             }
 
             auto state = observer.process(vision_packets,referee_packets,robothub_info); //TODO: fix time extrapolation
+            logRobots(state);
             std::size_t iterations = 0;
             bool sent = false;
             while(iterations < 10){
