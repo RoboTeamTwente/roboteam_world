@@ -7,7 +7,7 @@
 #include <proto/messages_robocup_ssl_wrapper.pb.h>
 
 constexpr char MARPLE_DELIMITER = ',';
-constexpr char ROBOT_LOG_MARPLE_HEADER[] = "time,id,posX,posY,angle,velX,velY,angleVel,hasBall,ballPos,sensorWorks,xSensCalibrated,capCharged,battery,signal";
+constexpr char ROBOT_LOG_MARPLE_HEADER[] = "time,id,posX,posY,angle,velX,velY,angleVel,sensorSeesBall,ballPos,sensorWorks,dribblerSeesBall,xSensCalibrated,capCharged,battery,signal";
 
 Handler::Handler(bool shouldLog) {
     if (shouldLog) {
@@ -113,7 +113,7 @@ bool Handler::setupLogFiles() {
 }
 
 void writeRobotToStream(const proto::WorldRobot& bot, long time, std::ofstream& stream) {
-    // time,id,posX,posY,angle,velX,velY,angleVel,hasBall,ballPos,sensorWorks,xSensCalibrated,capCharged,battery,signal
+    // time,id,posX,posY,angle,velX,velY,angleVel,sensorSeesBall,ballPos,sensorWorks,dribblerSeesBall,xSensCalibrated,capCharged,battery,signal
     stream
         << time << MARPLE_DELIMITER
         << bot.id() << MARPLE_DELIMITER
@@ -123,9 +123,10 @@ void writeRobotToStream(const proto::WorldRobot& bot, long time, std::ofstream& 
         << bot.vel().x() << MARPLE_DELIMITER
         << bot.vel().y() << MARPLE_DELIMITER
         << bot.w() << MARPLE_DELIMITER
-        << bot.feedbackinfo().has_ball() << MARPLE_DELIMITER
+        << bot.feedbackinfo().ball_sensor_sees_ball() << MARPLE_DELIMITER
         << bot.feedbackinfo().ball_position() << MARPLE_DELIMITER
         << bot.feedbackinfo().ball_sensor_is_working() << MARPLE_DELIMITER
+        << bot.feedbackinfo().dribbler_sees_ball() << MARPLE_DELIMITER
         << bot.feedbackinfo().xsens_is_calibrated() << MARPLE_DELIMITER
         << bot.feedbackinfo().capacitor_is_charged() << MARPLE_DELIMITER
         << bot.feedbackinfo().battery_level() << MARPLE_DELIMITER
