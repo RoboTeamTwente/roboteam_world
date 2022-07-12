@@ -35,10 +35,18 @@ void Handler::start(bool shouldLog) {
     }
 
     auto start = std::chrono::steady_clock::now();
+    std::size_t visionPacketCounter = 0;
 
     t.loop(
         [&]() {
             auto vision_packets = receiveVisionPackets();
+            visionPacketCounter += vision_packets.size();
+
+            t.limit([&]() {
+                std::cout << "Packets received: " << visionPacketCounter << std::endl;
+                visionPacketCounter = 0;
+            }, 1);
+
             auto referee_packets = receiveRefereePackets();
             std::vector<rtt::RobotsFeedback> robothub_info;
             {
