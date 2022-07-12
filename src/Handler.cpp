@@ -8,6 +8,8 @@
 
 #include <roboteam_logging/LogFileWriter.h>
 
+constexpr double TIME_STAMP_MAX_DIFFERENCE = 0.5; // The maximum difference in time stamps in seconds
+
 void Handler::start(bool shouldLog) {
     if (!initializeNetworkers()) {
         throw FailedToInitializeNetworkersException();
@@ -37,11 +39,52 @@ void Handler::start(bool shouldLog) {
     auto start = std::chrono::steady_clock::now();
     std::size_t visionPacketCounter = 0;
 
+    // Map of camera id with timeStamp of image taken and image sent
+    std::map<int, double> latestTimeTaken;
+    std::map<int, double> latestTimeSent;
+
     t.loop(
         [&]() {
             auto vision_packets = receiveVisionPackets();
-            visionPacketCounter += vision_packets.size();
 
+            // Map all latest timestamps with camera ids
+            for (const auto& vision_packet : vision_packets) {
+                if (vision_packet.has_detection()) {
+                    int camId = vision_packet.detection().camera_id();
+                    double currentTaken = vision_packet.detection().t_capture();
+                    double currentSent = vision_packet.detection().t_sent();
+
+                    double latestTaken = std::max(currentTaken, latestTimeTaken[camId]);
+                    double latestSent = std::max(currentSent, latestTimeSent[camId]);
+
+                    latestTimeTaken[camId] = latestTaken;
+                    latestTimeSent[camId] = latestSent;
+                }
+            }
+
+            // Now check if the difference between the latest timestamps is too big
+            t.limit([&]() {
+                // We can only compare if there are multiple cameras
+                if (latestTimeTaken.size() > 1) {
+                    auto minTaken = std::min_element(latestTimeTaken.begin(), latestTimeTaken.end(), [](auto l, auto r) { return l.second < r.second; });
+                    auto maxTaken = std::max_element(latestTimeTaken.begin(), latestTimeTaken.end(), [](auto l, auto r) { return l.second < r.second; });
+                    auto diff = std::fabs(minTaken->second - maxTaken->second);
+                    if (diff > TIME_STAMP_MAX_DIFFERENCE) {
+                        std::cout << "Too big difference between taken image time of cam" << std::fixed << minTaken->first << "[" << minTaken->second << "] and cam" << maxTaken->first << "[" << maxTaken->second << "]" << std::endl;
+                    }
+                }
+
+                if (latestTimeSent.size() > 1) {
+                    auto minSent = std::min_element(latestTimeSent.begin(), latestTimeSent.end(), [](auto l, auto r) { return l.second < r.second; });
+                    auto maxSent = std::max_element(latestTimeSent.begin(), latestTimeSent.end(), [](auto l, auto r) { return l.second < r.second; });
+                    auto diff = std::fabs(minSent->second - maxSent->second);
+                    if (diff > TIME_STAMP_MAX_DIFFERENCE) {
+                        std::cout << "Too big difference between sent image time of cam" << std::fixed << minSent->first << "[" << minSent->second << "] and cam" << maxSent->first << "[" << maxSent->second << "]" << std::endl;
+                    }
+                }
+            }, 5);
+
+            visionPacketCounter += vision_packets.size();
             t.limit([&]() {
                 std::cout << "Packets received: " << visionPacketCounter << std::endl;
                 visionPacketCounter = 0;
