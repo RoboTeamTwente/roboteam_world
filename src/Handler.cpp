@@ -3,6 +3,7 @@
 #include <roboteam_utils/Timer.h>
 #include <sstream>
 #include <algorithm>
+#include <limits>
 #include <proto/messages_robocup_ssl_wrapper.pb.h>
 
 #include <roboteam_logging/LogFileWriter.h>
@@ -33,6 +34,8 @@ void Handler::start(bool shouldLog) {
         fileWriter.value().open(file_name);
     }
 
+    auto start = std::chrono::steady_clock::now();
+
     t.loop(
         [&]() {
             auto vision_packets = receiveVisionPackets();
@@ -44,6 +47,20 @@ void Handler::start(bool shouldLog) {
             }
 
             auto state = observer.process(vision_packets,referee_packets,robothub_info); //TODO: fix time extrapolation
+
+            if (std::isnan(state.last_seen_world().ball().pos().x())
+                || std::isnan(state.last_seen_world().ball().pos().y())
+                || std::isnan(state.last_seen_world().ball().vel().x())
+                || std::isnan(state.last_seen_world().ball().pos().y())) {
+                auto now = std::chrono::steady_clock::now();
+                auto timeDifference = now - start;
+                auto hours = std::chrono::duration_cast<std::chrono::hours>(timeDifference).count() % 24;
+                auto minutes = std::chrono::duration_cast<std::chrono::minutes>(timeDifference).count() % 60;
+                auto seconds = std::chrono::duration_cast<std::chrono::seconds>(timeDifference).count() % 60;
+                auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timeDifference).count() % 1000;
+
+                std::cout << "Ball contained NaN after: " << hours << ":" << minutes << ":" << seconds << "." << milliseconds << std::endl;
+            }
             std::size_t iterations = 0;
             bool sent = false;
             while(iterations < 10){
