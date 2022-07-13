@@ -4,6 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <limits>
+#include <iomanip>
 #include <proto/messages_robocup_ssl_wrapper.pb.h>
 
 #include <roboteam_logging/LogFileWriter.h>
@@ -43,6 +44,11 @@ void Handler::start(bool shouldLog) {
     std::map<int, double> latestTimeTaken;
     std::map<int, double> latestTimeSent;
 
+    double biggestTakenDiff = 0.0;
+    double biggestSentDiff = 0.0;
+
+    long tick = 0;
+
     t.loop(
         [&]() {
             auto vision_packets = receiveVisionPackets();
@@ -69,6 +75,7 @@ void Handler::start(bool shouldLog) {
                     auto minTaken = std::min_element(latestTimeTaken.begin(), latestTimeTaken.end(), [](auto l, auto r) { return l.second < r.second; });
                     auto maxTaken = std::max_element(latestTimeTaken.begin(), latestTimeTaken.end(), [](auto l, auto r) { return l.second < r.second; });
                     auto diff = std::fabs(minTaken->second - maxTaken->second);
+                    biggestTakenDiff = std::max(biggestTakenDiff, diff);
                     if (diff > TIME_STAMP_MAX_DIFFERENCE) {
                         std::cout << "Too big difference between taken image time of cam" << std::fixed << minTaken->first << "[" << minTaken->second << "] and cam" << maxTaken->first << "[" << maxTaken->second << "]" << std::endl;
                     }
@@ -78,6 +85,7 @@ void Handler::start(bool shouldLog) {
                     auto minSent = std::min_element(latestTimeSent.begin(), latestTimeSent.end(), [](auto l, auto r) { return l.second < r.second; });
                     auto maxSent = std::max_element(latestTimeSent.begin(), latestTimeSent.end(), [](auto l, auto r) { return l.second < r.second; });
                     auto diff = std::fabs(minSent->second - maxSent->second);
+                    biggestSentDiff = std::max(biggestSentDiff, diff);
                     if (diff > TIME_STAMP_MAX_DIFFERENCE) {
                         std::cout << "Too big difference between sent image time of cam" << std::fixed << minSent->first << "[" << minSent->second << "] and cam" << maxSent->first << "[" << maxSent->second << "]" << std::endl;
                     }
@@ -86,8 +94,11 @@ void Handler::start(bool shouldLog) {
 
             visionPacketCounter += vision_packets.size();
             t.limit([&]() {
-                std::cout << "Packets received: " << visionPacketCounter << std::endl;
+                std::cout << "Tick: " << tick << ", packets received: " << visionPacketCounter << ", dTaken: " << std::fixed << std::setprecision(2) << biggestTakenDiff << ", dSent: " << biggestSentDiff << std::endl;
                 visionPacketCounter = 0;
+                biggestTakenDiff = 0.0;
+                biggestSentDiff = 0.0;
+                tick++;
             }, 1);
 
             auto referee_packets = receiveRefereePackets();
